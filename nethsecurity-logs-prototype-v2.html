@@ -1,0 +1,836 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>NethSecurity 8 · Log e report v2 (prototipo)</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500&family=Inter:wght@400;500&family=JetBrains+Mono&display=swap" rel="stylesheet">
+<style>
+:root{
+--page:#f9fafb;--card:#fff;--card2:#f3f4f6;--bd:#e5e7eb;--bd2:#d1d5db;
+--tx:#111827;--tx2:#6b7280;--tx3:#9ca3af;
+--pri:#4f46e5;--pri-bg:#eef2ff;--pri-bd:#c7d2fe;--tl:#0d9488;
+--dg:#dc2626;--dg-bg:#fef2f2;--dg-fill:#ef4444;--dg-bd:#fecaca;
+--wr:#b45309;--wr-bg:#fffbeb;--wr-fill:#f59e0b;--wr-bd:#fde68a;
+--ok:#047857;--ok-bg:#ecfdf5;
+--nav:#1f2937;--nav-tx2:#9ca3af;
+--sans:'Poppins','Inter',ui-sans-serif,system-ui,sans-serif;--mono:'JetBrains Mono',ui-monospace,Menlo,monospace;
+}
+html[data-dark]{
+--page:#111827;--card:#1f2937;--card2:#374151;--bd:#374151;--bd2:#4b5563;
+--tx:#f3f4f6;--tx2:#9ca3af;--tx3:#6b7280;
+--pri:#818cf8;--pri-bg:#312e81;--pri-bd:#4338ca;
+--dg:#f87171;--dg-bg:#450a0a;--dg-bd:#7f1d1d;--wr:#fbbf24;--wr-bg:#451a03;--wr-bd:#78350f;--ok:#34d399;--ok-bg:#064e3b;
+--nav:#0b1220;
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--page);color:var(--tx);font:14px/1.5 var(--sans);-webkit-font-smoothing:antialiased}
+button,select,input{font:inherit;color:inherit}
+a{color:var(--pri)}
+.app{display:flex;min-height:100vh}
+.nav{width:212px;flex:none;background:var(--nav);color:var(--nav-tx2);padding:14px 0;position:sticky;top:0;height:100vh;overflow:auto}
+.nav .brand{display:flex;align-items:center;gap:9px;padding:0 16px 16px;font-weight:500;color:#fff;font-size:15px}
+.nav .logo{width:24px;height:24px;border-radius:6px;background:var(--pri);display:grid;place-items:center;color:#fff;font-size:12px}
+.nav a{display:flex;align-items:center;gap:10px;padding:8px 16px;color:var(--nav-tx2);text-decoration:none;font-size:13px}
+.nav a.on{color:#fff;background:rgba(255,255,255,.08);box-shadow:inset 2px 0 0 var(--pri)}
+.nav a:hover{color:#fff}
+.nav .grp{padding:14px 16px 5px;font-size:11px;color:#6b7280}
+.main{flex:1;min-width:0}
+.top{height:52px;border-bottom:1px solid var(--bd);background:var(--card);display:flex;align-items:center;gap:12px;padding:0 20px;position:sticky;top:0;z-index:10}
+.gsearch{flex:1;max-width:420px;height:34px;border:1px solid var(--bd2);border-radius:6px;background:var(--card);display:flex;align-items:center;gap:7px;padding:0 10px}
+.gsearch:focus-within{border-color:var(--pri);box-shadow:0 0 0 3px var(--pri-bg)}
+.gsearch input{flex:1;border:0;background:none;outline:none}
+.wrap{padding:20px 24px 48px;max-width:1400px}
+h1{font-size:22px;font-weight:500;margin:0}
+h2{font-size:15px;font-weight:500;margin:0}
+.crumb{font-size:12px;color:var(--tx3);margin-bottom:3px}
+.crumb a{text-decoration:none}
+.tabs{display:flex;gap:22px;border-bottom:1px solid var(--bd);margin:16px 0 18px}
+.tab{padding:9px 0;font-size:14px;color:var(--tx2);cursor:pointer;border:0;border-bottom:2px solid transparent;background:none}
+.tab.on{color:var(--tx);font-weight:500;border-bottom-color:var(--pri)}
+.btn{height:34px;padding:0 11px;border:1px solid var(--bd2);border-radius:6px;background:var(--card);cursor:pointer;display:inline-flex;align-items:center;gap:6px;font-size:13px;white-space:nowrap}
+.btn:hover{background:var(--card2)}
+.btn.pri{background:var(--pri);border-color:var(--pri);color:#fff}
+.btn.sm{height:28px;font-size:12px;padding:0 9px}
+.card{background:var(--card);border:1px solid var(--bd);border-radius:10px}
+.pad{padding:14px 16px}
+.row{display:flex;align-items:center;gap:10px}
+.sp{flex:1}
+.sec{font-size:11px;color:var(--tx3);margin:0 0 7px}
+.small{font-size:12px}.mini{font-size:11px;color:var(--tx3)}.muted{color:var(--tx2)}
+svg.ic{width:16px;height:16px;stroke:currentColor;fill:none;stroke-width:1.7;stroke-linecap:round;stroke-linejoin:round;flex:none}
+.ins{display:flex;gap:11px;padding:12px 14px;align-items:flex-start;border-top:1px solid var(--bd)}
+.ins:first-child{border-top:0}
+.ins.d{border-left:3px solid var(--dg-fill)}
+.ins.w{border-left:3px solid var(--wr-fill)}
+.ins.n{border-left:3px solid var(--bd2)}
+.tiles{display:grid;grid-template-columns:repeat(auto-fit,minmax(215px,1fr));gap:9px}
+.tile{background:var(--card);border:1px solid var(--bd);border-radius:8px;padding:10px 12px;display:flex;justify-content:space-between;align-items:center;gap:8px;cursor:pointer;font-size:13px}
+.tile:hover{border-color:var(--pri);background:var(--pri-bg)}
+.verd{border-radius:10px;padding:12px 14px;margin-bottom:14px;border:1px solid}
+.verd.d{background:var(--dg-bg);border-color:var(--dg-bd);color:var(--dg)}
+.verd.w{background:var(--wr-bg);border-color:var(--wr-bd);color:var(--wr)}
+.verd.n{background:var(--card2);border-color:var(--bd);color:var(--tx)}
+.verd .s{font-size:12px;margin-top:3px;opacity:.9}
+.qbar{display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-bottom:12px}
+.qbox{flex:1;min-width:270px;min-height:36px;border:1px solid var(--bd2);border-radius:6px;background:var(--card);display:flex;align-items:center;gap:6px;padding:4px 10px;flex-wrap:wrap}
+.qbox:focus-within{border-color:var(--pri);box-shadow:0 0 0 3px var(--pri-bg)}
+.qbox input{flex:1;min-width:120px;border:0;background:none;outline:none;height:26px}
+.chip{display:inline-flex;align-items:center;gap:5px;background:var(--pri-bg);color:var(--pri);border:1px solid var(--pri-bd);font-size:12px;padding:2px 7px;border-radius:5px}
+.chip button{border:0;background:none;cursor:pointer;color:inherit;padding:0;display:grid;place-items:center}
+.sel{height:36px;border:1px solid var(--bd2);border-radius:6px;background:var(--card);padding:0 8px}
+.grid{display:grid;grid-template-columns:212px minmax(0,1fr);gap:18px;align-items:start}
+.fx{display:flex;justify-content:space-between;gap:8px;padding:3px 0;font-size:13px;color:var(--tx2);cursor:pointer}
+.fx:hover{color:var(--tx)}.fx.on{color:var(--pri)}
+.fx .cb{width:13px;height:13px;border:1px solid var(--bd2);border-radius:3px;display:inline-grid;place-items:center;margin-right:7px;vertical-align:-2px}
+.fx.on .cb{background:var(--pri);border-color:var(--pri);color:#fff}
+.fx .n{color:var(--tx3);font-size:12px;font-variant-numeric:tabular-nums}
+.histo{display:flex;align-items:flex-end;gap:2px;height:70px;user-select:none;cursor:crosshair}
+.hb{flex:1;display:flex;flex-direction:column;justify-content:flex-end;gap:1px;min-width:2px}
+.hb i{display:block;border-radius:2px}
+.hb.off{opacity:.28}
+table.ev{width:100%;border-collapse:collapse;table-layout:fixed}
+table.ev th{text-align:left;font-weight:400;font-size:11px;color:var(--tx3);padding:8px 10px;border-bottom:1px solid var(--bd);background:var(--card2)}
+table.ev td{padding:8px 10px;border-bottom:1px solid var(--bd);font-size:13px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+table.ev tr.r{cursor:pointer}
+table.ev tr.r:hover td{background:var(--card2)}
+table.ev tr.r.sel td{background:var(--pri-bg)}
+.mono{font-family:var(--mono);font-size:12px}
+.sv{display:inline-block;width:6px;height:6px;border-radius:50%;vertical-align:1px;margin-right:6px}
+.pill{font-size:11px;padding:2px 6px;border-radius:5px;white-space:nowrap}
+.p-drop{background:var(--dg-fill);color:#fff}.p-allow{background:var(--ok-bg);color:var(--ok)}
+.p-warn{background:var(--wr-bg);color:var(--wr)}.p-diff{background:var(--pri-bg);color:var(--pri)}
+.cnt{background:var(--card2);color:var(--tx2);font-size:11px;padding:1px 5px;border-radius:4px;margin-left:6px}
+.kpi{background:var(--card2);border-radius:8px;padding:10px 12px}
+.kpi .l{font-size:12px;color:var(--tx2)}.kpi .v{font-size:22px;font-weight:500;line-height:1.3}
+.bar{height:6px;background:var(--card2);border-radius:3px;overflow:hidden}
+.bar i{display:block;height:100%;background:var(--pri)}
+.lst{font-size:13px}
+.lst div.i{display:flex;justify-content:space-between;gap:8px;padding:6px 0;border-bottom:1px solid var(--bd)}
+.lst div.i:last-child{border-bottom:0}
+.lnk{color:var(--pri);cursor:pointer}
+.dr{position:fixed;top:0;right:0;bottom:0;width:470px;max-width:94vw;background:var(--card);border-left:1px solid var(--bd);box-shadow:-8px 0 24px rgba(0,0,0,.09);transform:translateX(103%);transition:transform .18s ease;z-index:40;display:flex;flex-direction:column}
+.dr.open{transform:none}
+.dr .hd{padding:13px 16px;border-bottom:1px solid var(--bd);display:flex;gap:10px;align-items:flex-start}
+.dr .bd{padding:14px 16px;overflow:auto}
+.kv{display:grid;grid-template-columns:112px minmax(0,1fr);gap:6px 10px;font-size:13px}
+.kv dt{color:var(--tx2)}.kv dd{margin:0;word-break:break-all}
+.raw{background:var(--card2);border-radius:6px;padding:9px 10px;font-family:var(--mono);font-size:11.5px;line-height:1.65;word-break:break-all;color:var(--tx2)}
+.dot{border-bottom:1px dotted var(--tx3);cursor:help}
+.steps{font-size:13px;line-height:1.85}
+.steps b{font-weight:400;color:var(--tx2);margin-right:5px}
+.empty{text-align:center;padding:34px 20px}
+.sw{width:38px;height:21px;border-radius:11px;background:var(--bd2);position:relative;cursor:pointer;border:0;padding:0;flex:none}
+.sw i{position:absolute;top:2px;left:2px;width:17px;height:17px;border-radius:50%;background:#fff;transition:left .15s}
+.sw.on{background:var(--tl)}.sw.on i{left:19px}
+.banner{display:flex;gap:10px;padding:11px 13px;border-radius:8px;font-size:13px;align-items:flex-start;border:1px solid}
+.banner.w{background:var(--wr-bg);border-color:var(--wr-bd);color:var(--wr)}
+@media (max-width:1000px){.grid{grid-template-columns:1fr}.nav{width:58px}.nav a span,.nav .brand span,.nav .grp{display:none}}
+</style>
+</head>
+<body>
+<div class="app">
+<aside class="nav">
+  <div class="brand"><div class="logo">N</div><span>NethSecurity</span></div>
+  <a href="#"><svg class="ic"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg><span>Dashboard</span></a>
+  <div class="grp">Configurazione</div>
+  <a href="#"><svg class="ic"><rect x="2" y="6" width="20" height="12" rx="2"/></svg><span>Sistema</span></a>
+  <a href="#"><svg class="ic"><circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3v18"/></svg><span>Rete</span></a>
+  <a href="#"><svg class="ic"><path d="M12 3l8 4v5c0 5-3.5 8-8 9-4.5-1-8-4-8-9V7z"/></svg><span>Firewall</span></a>
+  <a href="#"><svg class="ic"><path d="M4 6h16M4 12h16M4 18h10"/></svg><span>Sicurezza</span></a>
+  <a href="#"><svg class="ic"><path d="M12 2l3 4h-6zM12 6v16M6 22h12"/></svg><span>VPN</span></a>
+  <div class="grp">Monitoraggio</div>
+  <a href="#"><svg class="ic"><path d="M3 17l5-6 4 4 3-5 6 7"/></svg><span>Metriche</span></a>
+  <a href="#" class="on"><svg class="ic"><path d="M5 3h11l3 3v15H5z"/><path d="M8 10h8M8 14h8M8 18h5"/></svg><span>Log e report</span></a>
+  <a href="#"><svg class="ic"><path d="M12 3a6 6 0 016 6v4l2 3H4l2-3V9a6 6 0 016-6z"/><path d="M10 19a2 2 0 004 0"/></svg><span>Avvisi</span></a>
+</aside>
+<div class="main">
+  <div class="top">
+    <div class="gsearch"><svg class="ic" style="color:var(--tx3)"><circle cx="11" cy="11" r="7"/><path d="M20 20l-4-4"/></svg><input id="gs" placeholder="Cerca un host, un IP, una regola, un tunnel"></div>
+    <span class="mini" id="hint">prova: camera-ip-02 · 192.168.1.88 · sede-milano</span>
+    <div class="sp"></div>
+    <button class="btn sm" id="dk"><svg class="ic"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M2 12h2M20 12h2"/></svg>Tema</button>
+  </div>
+  <div class="wrap" id="wrap"></div>
+</div>
+</div>
+<div class="dr" id="drawer"></div>
+
+<script>
+"use strict";
+function rng(s){return function(){s|=0;s=s+0x6D2B79F5|0;var t=Math.imul(s^s>>>15,1|s);t=t+Math.imul(t^t>>>7,61|t)^t;return((t^t>>>14)>>>0)/4294967296}}
+var R=rng(20260907);
+function pick(a){return a[Math.floor(R()*a.length)]}
+function ri(a,b){return a+Math.floor(R()*(b-a+1))}
+function p2(n){return n<10?'0'+n:''+n}
+function hms(d){return p2(d.getHours())+':'+p2(d.getMinutes())+':'+p2(d.getSeconds())}
+function nf(n){return n.toLocaleString('it-IT')}
+function esc(s){return String(s==null?'':s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;')}
+function fill(t,e){return String(t).replace(/\{(\w+)\}/g,function(m,k){return e[k]!=null&&e[k]!==''?e[k]:'—'})}
+
+var CONS={blocked:{l:'Traffico bloccato',c:'d'},degraded:{l:'Servizio degradato',c:'w'},security:{l:'Sicurezza',c:'d'},change:{l:'Modifica',c:'n'},info:{l:'Informativo',c:'n'}};
+
+var CAT={
+'fw.traffic.dropped':{cat:'Firewall',cons:'blocked',act:'drop',noise:'high',
+ label:'Traffico bloccato da una regola',
+ mean:'Il firewall ha scartato il pacchetto senza rispondere: il client resta in attesa e va in timeout.',
+ causes:['La regola {rule} nega esplicitamente questo traffico.','Il traffico non rientra in nessun permesso e la politica della zona lo nega.','Il client usa una porta diversa da quella prevista dalla regola.'],
+ steps:['Apri la regola {rule} e verifica sorgente, destinazione e porta.','Se il traffico è legittimo, aggiungi un permesso più specifico sopra questa regola.','Guarda la storia di {src} per capire se riguarda solo questa destinazione.']},
+'fw.session.allowed':{cat:'Firewall',cons:'info',act:'allow',noise:'high',
+ label:'Nuova sessione consentita',
+ mean:'Il traffico è passato: se il problema persiste, non è il firewall a bloccarlo.',
+ causes:['Traffico conforme alla regola {rule}.'],
+ steps:['Il firewall ha inoltrato la sessione: verifica il servizio di destinazione o l\'applicazione del client.']},
+'fw.zone.denied':{cat:'Firewall',cons:'blocked',act:'drop',noise:'high',
+ label:'Traffico tra zone non consentito',
+ mean:'Le due zone non hanno una politica di inoltro che permetta questo traffico.',
+ causes:['Nessuna regola tra le zone, comportamento atteso.','Il dispositivo è nella zona sbagliata, spesso per una VLAN o un lease errato.'],
+ steps:['Verifica che {src} appartenga alla zona corretta.','Se il traffico serve, crea una regola tra le due zone anziché aprire la politica generale.']},
+'fw.state.invalid':{cat:'Firewall',cons:'degraded',act:'drop',noise:'medium',
+ label:'Pacchetto fuori sessione',
+ mean:'È arrivato un pacchetto che non appartiene a nessuna connessione conosciuta: la comunicazione si interrompe a metà.',
+ causes:['Instradamento asimmetrico: la risposta rientra da un\'altra interfaccia.','Sessione scaduta mentre il client la considerava aperta.','Doppio gateway sulla stessa rete.'],
+ steps:['Verifica che andata e ritorno passino dalla stessa interfaccia.','Controlla la presenza di un secondo router sulla rete di {src}.']},
+'dns.query.blocked':{cat:'DNS e DHCP',cons:'blocked',act:'block',noise:'high',
+ label:'Dominio bloccato',
+ mean:'La risoluzione è stata negata perché il dominio è in una lista di blocco: il client vede il sito come non raggiungibile.',
+ causes:['Il dominio {dst} è in una blocklist attiva.','Falso positivo su un dominio legittimo, tipico di CDN e telemetria.'],
+ steps:['Se il dominio serve, aggiungilo agli esclusi di Threat Shield DNS.','Verifica quante altre richieste dello stesso host sono state bloccate.']},
+'dhcp.lease.ack':{cat:'DNS e DHCP',cons:'info',act:'allow',noise:'high',
+ label:'Indirizzo assegnato',
+ mean:'Il dispositivo ha ricevuto un indirizzo e ora è in rete.',
+ causes:['Richiesta DHCP regolare o rinnovo del lease.'],
+ steps:['Il dispositivo è comparso in rete: da qui puoi seguirne l\'attività.']},
+'dpi.app.blocked':{cat:'DPI e app',cons:'blocked',act:'drop',noise:'medium',
+ label:'Applicazione bloccata',
+ mean:'Il traffico è stato riconosciuto come {app} e bloccato da una regola di filtro applicativo.',
+ causes:['Regola di filtro applicativo attiva sulla zona.','Riconoscimento errato di un\'applicazione legittima.'],
+ steps:['Se il blocco non è voluto, escludi l\'host o l\'applicazione dalla regola {rule}.']},
+'ts.ip.blocked':{cat:'Threat shield',cons:'security',act:'block',noise:'high',
+ label:'Sorgente in blocklist',
+ mean:'Un indirizzo con cattiva reputazione ha tentato di raggiungere il firewall ed è stato fermato prima di ogni regola.',
+ causes:['Scansione o tentativo di accesso da internet. È rumore di fondo normale sulla WAN.','Falso positivo su un indirizzo legittimo, per esempio la sede di un cliente.'],
+ steps:['Se l\'indirizzo è legittimo, aggiungilo agli esclusi di Threat Shield.','Volumi altissimi verso una sola porta indicano una scansione, non un guasto.']},
+'vpn.rw.connected':{cat:'VPN',cons:'info',act:'allow',noise:'medium',
+ label:'Utente VPN connesso',
+ mean:'{user} ha stabilito la connessione e ha ricevuto un indirizzo sulla rete VPN.',
+ causes:['Autenticazione riuscita di un client roadwarrior.'],
+ steps:['Se l\'utente si connette ma non raggiunge le risorse, verifica le regole della zona VPN.']},
+'vpn.rw.auth.failed':{cat:'VPN',cons:'security',act:'block',noise:'medium',
+ label:'Autenticazione VPN non riuscita',
+ mean:'Le credenziali o il certificato del client non sono stati accettati.',
+ causes:['Password errata o account disabilitato.','Certificato scaduto o revocato.','Tentativo non autorizzato, se ripetuto da indirizzi diversi.'],
+ steps:['Verifica lo stato dell\'utente e la validità del certificato.','Molti tentativi da indirizzi diversi indicano un attacco: valuta Threat Shield sulla porta VPN.']},
+'vpn.ipsec.child.rekey':{cat:'VPN',cons:'info',act:'warn',noise:'high',
+ label:'Rinegoziazione del tunnel',
+ mean:'Normale rinnovo delle chiavi. Isolato non indica alcun problema; se ripetuto molte volte al giorno segnala instabilità della linea.',
+ causes:['Scadenza programmata delle chiavi.','Perdita di pacchetti che forza rinegoziazioni frequenti.'],
+ steps:['Ignoralo se isolato.','Se le occorrenze sono decine al giorno, indaga la qualità della linea del tunnel {tunnel}.']},
+'vpn.ipsec.tunnel.down':{cat:'VPN',cons:'degraded',act:'warn',noise:'low',
+ label:'Tunnel IPsec caduto',
+ mean:'Il tunnel {tunnel} non è più attivo: la sede remota non è raggiungibile.',
+ causes:['Linea WAN caduta su uno dei due lati.','Cambio di indirizzo pubblico del peer.','Parametri di cifratura non concordanti dopo una modifica.'],
+ steps:['Verifica lo stato delle WAN sui due lati.','Se la caduta segue una modifica, confronta i parametri dei due peer.','Guarda la storia del tunnel per distinguere un guasto da un\'instabilità cronica.']},
+'wan.failover':{cat:'Sistema',cons:'degraded',act:'warn',noise:'low',
+ label:'Linea WAN cambiata',
+ mean:'Il traffico è stato spostato su un\'altra linea: le connessioni in corso si interrompono e l\'indirizzo pubblico cambia.',
+ causes:['Guasto o degrado della linea primaria.','Soglie di controllo troppo aggressive che provocano cambi continui.'],
+ steps:['Verifica stato e qualità delle linee.','Ricorda che i tunnel VPN si riavviano a ogni cambio di linea.']},
+'audit.config.changed':{cat:'Modifiche',cons:'change',act:'diff',noise:'medium',
+ label:'Configurazione modificata',
+ mean:'{user} ha modificato {area} dalla interfaccia web. Utile da confrontare con l\'inizio di un malfunzionamento.',
+ causes:['Intervento amministrativo o correzione in corso.'],
+ steps:['Confronta l\'orario della modifica con l\'inizio del problema segnalato.','Apri il dettaglio per vedere quali campi sono cambiati.']}
+};
+
+var HOSTS={
+'10.181.181.105':{n:'camera-ip-02',mac:'08:35:71:f0:e4:8a',z:'iot',if:'eth0.20',seen:'12 marzo'},
+'10.181.181.108':{n:'nas-backup',mac:'00:11:32:aa:41:07',z:'iot',if:'eth0.20',seen:'4 gennaio'},
+'10.181.181.112':{n:'termostato-1',mac:'b8:27:eb:19:5c:31',z:'iot',if:'eth0.20',seen:'22 aprile'},
+'192.168.1.44':{n:'pc-ufficio-14',mac:'3c:52:82:0d:11:9a',z:'lan',if:'eth0',seen:'8 novembre'},
+'192.168.1.91':{n:'pc-marketing-3',mac:'a4:83:e7:2c:04:5b',z:'lan',if:'eth0',seen:'2 febbraio'},
+'192.168.1.7':{n:'stampante-hp',mac:'44:db:d2:ce:17:ca',z:'lan',if:'eth0',seen:'19 giugno'},
+'192.168.1.40':{n:'pc-davide',mac:'f0:18:98:41:2a:7e',z:'lan',if:'eth0',seen:'3 gennaio'}
+};
+function hostByName(q){for(var k in HOSTS)if(HOSTS[k].n===q)return k;return null}
+var BAD=['185.220.101.34','45.155.204.7','193.32.162.11','89.248.165.4','141.98.10.62','5.188.206.14'];
+var EXT=['8.8.8.8','1.1.1.1','9.9.9.9','52.97.14.9','104.18.2.10','151.101.1.1'];
+var DOM=['telemetry.example-cdn.net','ads.tracker-hub.io','c2.badactor-pool.ru','metrics.smart-tv.net'];
+var APPS=['netflix','bittorrent','tiktok','teamviewer'];
+var USERS=['m.rossi','l.bianchi','g.verdi'];
+var HOUR=60,NOW=new Date(2026,8,7,16,20,0);
+function tsOf(m,s){return new Date(NOW.getTime()-(HOUR-m)*60000+s*1000)}
+
+var T=[
+{w:24,eid:'fw.traffic.dropped',mk:function(){return{src:'10.181.181.105',sport:ri(32000,64000),dst:pick(EXT),dport:53,proto:'udp',zone:'iot → wan',iface:'eth0.20',rule:'RETE-IOT_DNS_E'}}},
+{w:5,eid:'fw.traffic.dropped',mk:function(){return{src:'10.181.181.108',sport:ri(32000,64000),dst:pick(EXT),dport:pick([80,443]),proto:'tcp',zone:'iot → wan',iface:'eth0.20',rule:'RETE-IOT_WEB'}}},
+{w:6,eid:'fw.zone.denied',mk:function(){return{src:pick(['10.181.181.108','10.181.181.112']),sport:ri(32000,64000),dst:'192.168.1.10',dport:445,proto:'tcp',zone:'iot → lan',iface:'eth0.20',rule:'GUEST-ISOLATION'}}},
+{w:18,eid:'fw.session.allowed',mk:function(){return{src:pick(['192.168.1.44','192.168.1.91','192.168.1.23','192.168.1.40']),sport:ri(40000,60000),dst:pick(EXT),dport:pick([443,443,80]),proto:'tcp',zone:'lan → wan',iface:'eth0',rule:'LAN-OUT_ANY'}}},
+{w:3,eid:'fw.state.invalid',mk:function(){return{src:pick(['192.168.1.44','192.168.1.91']),sport:ri(40000,60000),dst:pick(EXT),dport:443,proto:'tcp',zone:'lan → wan',iface:'eth0',rule:'-'}}},
+{w:9,eid:'dns.query.blocked',mk:function(){return{src:pick(['192.168.1.44','192.168.1.91','192.168.1.7']),sport:0,dst:pick(DOM),dport:53,proto:'udp',zone:'lan → fw',iface:'eth0',rule:'ts-dns-community'}}},
+{w:4,eid:'dhcp.lease.ack',mk:function(){return{src:pick(['192.168.1.44','192.168.1.7','192.168.1.91']),sport:0,dst:'',dport:67,proto:'udp',zone:'lan → fw',iface:'eth0',rule:'dhcp'}}},
+{w:7,eid:'dpi.app.blocked',mk:function(){return{src:pick(['192.168.1.91','192.168.1.44']),sport:ri(40000,60000),dst:pick(EXT),dport:443,proto:'tcp',zone:'lan → wan',iface:'eth0',rule:'DPI-STREAMING',app:pick(APPS)}}},
+{w:11,eid:'ts.ip.blocked',mk:function(){return{src:pick(BAD),sport:ri(40000,60000),dst:'10.181.181.1',dport:pick([22,443,3389]),proto:'tcp',zone:'wan → fw',iface:'eth1',rule:pick(['ts-dshield','ts-firehol'])}}},
+{w:3,eid:'vpn.rw.connected',mk:function(){var u=pick(USERS);return{src:'87.12.'+ri(1,250)+'.'+ri(1,250),sport:0,dst:'10.9.9.'+ri(2,60),dport:1194,proto:'udp',zone:'wan → fw',iface:'eth1',rule:'ns_roadwarrior1',user:u,host:u}}},
+{w:2,eid:'vpn.rw.auth.failed',mk:function(){return{src:pick(BAD.concat(['93.44.18.2'])),sport:0,dst:'',dport:1194,proto:'udp',zone:'wan → fw',iface:'eth1',rule:'ns_roadwarrior1',user:pick(['administrator','m.rossi','root'])}}},
+{w:9,eid:'vpn.ipsec.child.rekey',mk:function(){return{src:'',sport:0,dst:'',dport:0,proto:'esp',zone:'wan → fw',iface:'eth1',rule:'sede-milano',tunnel:'sede-milano'}}},
+{w:2,eid:'vpn.ipsec.tunnel.down',mk:function(){return{src:'',sport:0,dst:'93.51.7.204',dport:500,proto:'esp',zone:'wan → fw',iface:'eth1',rule:'sede-milano',tunnel:'sede-milano'}}},
+{w:1,eid:'wan.failover',mk:function(){return{src:'',sport:0,dst:'',dport:0,proto:'',zone:'',iface:'eth1',rule:'wan-failover'}}},
+{w:2,eid:'audit.config.changed',mk:function(){return{src:'192.168.1.40',sport:0,dst:'',dport:0,proto:'https',zone:'lan → fw',iface:'eth0',rule:'ns.firewall/edit-rule',user:'davide',area:pick(['le regole firewall','il filtro applicativo','Threat Shield DNS'])}}}
+];
+var WS=T.reduce(function(a,t){return a+t.w},0);
+function tp(){var r=R()*WS,c=0;for(var i=0;i<T.length;i++){c+=T[i].w;if(r<c)return T[i]}return T[0]}
+
+var DATA=[],seq=0;
+(function(){
+ for(var m=0;m<HOUR;m++){
+  var n=ri(7,14); if(m>=46&&m<=52)n+=ri(12,22); if(m>=26&&m<=28)n+=ri(5,10);
+  for(var k=0;k<n;k++){
+   var t=tp(),e=t.mk();
+   e.id=++seq; e.eid=t.eid; e.min=m; e.ts=tsOf(m,ri(0,59));
+   var c=CAT[t.eid]; e.cat=c.cat; e.act=c.act; e.cons=c.cons;
+   if(!e.host&&HOSTS[e.src])e.host=HOSTS[e.src].n;
+   DATA.push(e);
+  }
+ }
+ DATA.sort(function(a,b){return b.ts-a.ts});
+})();
+
+var S={route:{n:'overview'},tokens:[],cons:[],cat:[],range:null,sel:null,live:true,deg:false,scope:'24h',
+ sim:{src:'10.181.181.105',dst:'8.8.8.8',dport:53,proto:'udp',iface:'eth0.20',res:null,trace:false,tracing:false}};
+
+function label(e){return fill(CAT[e.eid].label,e)}
+function mean(e){return fill(CAT[e.eid].mean,e)}
+function pillOf(a){var c=a==='drop'||a==='block'?'p-drop':a==='allow'?'p-allow':a==='warn'?'p-warn':'p-diff';return '<span class="pill '+c+'">'+a+'</span>'}
+function dotOf(c){return c==='blocked'||c==='security'?'var(--dg-fill)':c==='degraded'?'var(--wr-fill)':'var(--bd2)'}
+function go(n,a){S.route={n:n,a:a};S.sel=null;window.scrollTo(0,0);render()}
+
+function tokMatch(e,t){var v=t.v.toLowerCase();
+ switch(t.k){
+  case 'src':return (e.src||'').toLowerCase()===v;
+  case 'host':return (e.host||'').toLowerCase()===v;
+  case 'dst':return (e.dst||'').toLowerCase()===v;
+  case 'rule':return (e.rule||'').toLowerCase()===v;
+  case 'tunnel':return (e.tunnel||'').toLowerCase()===v;
+  case 'event':return e.eid===t.v;
+  case 'action':return e.act===v;
+  case 'port':return String(e.dport)===v;
+  case 'user':return (e.user||'').toLowerCase()===v;
+  default:return (label(e)+' '+JSON.stringify(e)).toLowerCase().indexOf(v)>-1;
+ }}
+function baseSet(){return DATA.filter(function(e){return S.tokens.every(function(t){return tokMatch(e,t)})})}
+function fOk(e,skip){
+ if(skip!=='cons'&&S.cons.length&&S.cons.indexOf(e.cons)<0)return false;
+ if(skip!=='cat'&&S.cat.length&&S.cat.indexOf(e.cat)<0)return false;
+ return true}
+function tOk(e){return !S.range||(e.min>=S.range[0]&&e.min<=S.range[1])}
+function res(){return baseSet().filter(function(e){return fOk(e,null)&&tOk(e)})}
+
+function topBy(list,key,n){var m={};list.forEach(function(e){var k=e[key];if(!k||k==='-')return;m[k]=(m[k]||0)+1});
+ return Object.keys(m).sort(function(a,b){return m[b]-m[a]}).slice(0,n||5).map(function(k){return[k,m[k]]})}
+
+function verdict(list){
+ if(!list.length)return null;
+ var blocked=list.filter(function(e){return e.cons==='blocked'||e.cons==='security'});
+ var tr=topBy(list,'rule',1)[0], ts=topBy(list,'src',1)[0], te=topBy(list.map(function(e){return{rule:e.eid}}),'rule',1)[0];
+ var out=null;
+ if(tr&&tr[1]/list.length>=0.5&&ts&&ts[1]/list.length>=0.5)
+  out={c:blocked.length/list.length>0.6?'d':'n',t:tr[1]+' dei '+list.length+' eventi sono la stessa cosa: '+(CAT[list[0].eid]?CAT[list[0].eid].label.toLowerCase():'evento')+' su '+tr[0]+' da '+(HOSTS[ts[0]]?HOSTS[ts[0]].n:ts[0])+'.',
+   s:'Un solo host e una sola regola spiegano la maggior parte del risultato: guarda quello, non la lista.'};
+ else if(blocked.length/list.length>0.7)
+  out={c:'d',t:nf(blocked.length)+' eventi su '+nf(list.length)+' sono blocchi, concentrati su '+(tr?tr[0]:'più regole')+'.',
+   s:'Le sorgenti coinvolte sono '+topBy(list,'src',9).length+'. Restringi per host se cerchi una segnalazione singola.'};
+ else if(te&&CAT[te[0]]&&CAT[te[0]].cons==='info')
+  out={c:'n',t:nf(list.length)+' eventi, in prevalenza informativi.',s:'Nessuna concentrazione anomala in questo intervallo.'};
+ else out={c:'n',t:nf(list.length)+' eventi, '+nf(blocked.length)+' bloccati.',s:'Categoria prevalente: '+(topBy(list,'cat',1)[0]||['-'])[0]+'.'};
+ return out;
+}
+
+function insights(){
+ var out=[];
+ var dropByHost={};
+ DATA.forEach(function(e){if(e.cons==='blocked'&&e.src&&HOSTS[e.src])dropByHost[e.src]=(dropByHost[e.src]||0)+1});
+ var top=Object.keys(dropByHost).sort(function(a,b){return dropByHost[b]-dropByHost[a]})[0];
+ if(top)out.push({c:'d',ic:'M4 7h16M4 12h16M4 17h10',t:HOSTS[top].n+' ha generato '+nf(dropByHost[top]*14)+' blocchi nelle ultime 24 ore, il triplo di ieri.',
+  s:'Tutti dalla regola RETE-IOT_DNS_E. Il dispositivo riprova senza sosta e non risolve alcun nome.',go:['host',top]});
+ var rk=DATA.filter(function(e){return e.eid==='vpn.ipsec.child.rekey'}).length;
+ var dn=DATA.filter(function(e){return e.eid==='vpn.ipsec.tunnel.down'}).length;
+ if(rk>4)out.push({c:'w',ic:'M12 3v18',t:'Il tunnel sede-milano si è rinegoziato '+(rk+dn)+' volte nell\'ultima ora, con '+dn+' cadute.',
+  s:'Nelle sette settimane precedenti la media era di due rinegoziazioni al giorno.',go:['tunnel','sede-milano']});
+ var af=DATA.filter(function(e){return e.eid==='vpn.rw.auth.failed'});
+ if(af.length>1)out.push({c:'w',ic:'M12 3l8 4v5c0 5-3.5 8-8 9-4.5-1-8-4-8-9V7z',t:af.length+' autenticazioni VPN non riuscite, su '+topBy(af,'user',9).length+' nomi utente diversi.',
+  s:'Uno dei nomi tentati non esiste nel sistema, segno di tentativi automatici e non di un utente distratto.',go:['explore',{tokens:[{k:'event',v:'vpn.rw.auth.failed'}]}]});
+ var ch=DATA.filter(function(e){return e.eid==='audit.config.changed'});
+ if(ch.length)out.push({c:'n',ic:'M5 3h11l3 3v15H5z',t:ch.length+' modifiche di configurazione nell\'ultima ora, tutte di davide.',
+  s:'Utile da confrontare se qualcosa ha smesso di funzionare nello stesso momento.',go:['explore',{tokens:[{k:'event',v:'audit.config.changed'}]}]});
+ return out;
+}
+
+var VIEWS=[
+ {n:'Traffico bloccato in uscita',f:function(){return{tokens:[],cons:['blocked'],cat:['Firewall']}},c:function(){return DATA.filter(function(e){return e.cons==='blocked'&&e.cat==='Firewall'}).length}},
+ {n:'Problemi VPN',f:function(){return{tokens:[],cons:['degraded','security'],cat:['VPN']}},c:function(){return DATA.filter(function(e){return e.cat==='VPN'&&e.cons!=='info'}).length}},
+ {n:'Cosa è cambiato',f:function(){return{tokens:[{k:'event',v:'audit.config.changed'}],cons:[],cat:[]}},c:function(){return DATA.filter(function(e){return e.eid==='audit.config.changed'}).length}},
+ {n:'Domini bloccati',f:function(){return{tokens:[{k:'event',v:'dns.query.blocked'}],cons:[],cat:[]}},c:function(){return DATA.filter(function(e){return e.eid==='dns.query.blocked'}).length}},
+ {n:'Attacchi dalla WAN',f:function(){return{tokens:[{k:'event',v:'ts.ip.blocked'}],cons:[],cat:[]}},c:function(){return DATA.filter(function(e){return e.eid==='ts.ip.blocked'}).length}},
+ {n:'Traffico consentito',f:function(){return{tokens:[{k:'event',v:'fw.session.allowed'}],cons:[],cat:[]}},c:function(){return DATA.filter(function(e){return e.eid==='fw.session.allowed'}).length}}
+];
+
+function tabs(active){
+ return '<div class="tabs">'+[['overview','Panoramica'],['explore','Esplora'],['simulate','Simula'],['live','Live'],['settings','Impostazioni']]
+ .map(function(t){return '<button class="tab'+(t[0]===active?' on':'')+'" data-tab="'+t[0]+'">'+t[1]+'</button>'}).join('')+'</div>';
+}
+function head(title,crumb,actions){
+ return '<div class="crumb">'+crumb+'</div><div class="row" style="align-items:flex-start"><div><h1>'+title+'</h1></div><div class="sp"></div><div class="row">'+(actions||'')+'</div></div>';
+}
+
+function vOverview(){
+ var ins=insights();
+ return head('Log e report','Monitoraggio','<select class="sel" id="scope"><option value="24h">Ultime 24 ore</option><option value="7d">Ultimi 7 giorni</option><option value="30d">Ultimi 30 giorni</option></select>')
+ +tabs('overview')
+ +'<p class="sec">Da guardare</p><div class="card" style="margin-bottom:18px">'
+ +(ins.length?ins.map(function(i,k){return '<div class="ins '+i.c+'"><svg class="ic" style="color:var(--tx2);margin-top:2px"><path d="'+i.ic+'"/></svg><div style="flex:1;min-width:0"><div>'+esc(i.t)+'</div><div class="small muted" style="margin-top:2px">'+esc(i.s)+'</div></div><button class="btn sm" data-ins="'+k+'">Apri</button></div>'}).join('')
+   :'<div class="empty muted">Nessuna anomalia nelle ultime 24 ore.</div>')
+ +'</div>'
+ +'<p class="sec">Punti di partenza</p><div class="tiles" style="margin-bottom:18px">'
+ +VIEWS.map(function(v,k){return '<div class="tile" data-view="'+k+'"><span>'+v.n+'</span><span class="muted small">'+nf(v.c()*(S.scope==='24h'?14:S.scope==='7d'?98:420))+'</span></div>'}).join('')
+ +'</div>'
+ +'<div class="card pad" style="display:flex;gap:11px;align-items:center"><svg class="ic" style="color:var(--tx2)"><path d="M4 20h16M7 20V9l5-5 5 5v11"/></svg>'
+ +'<div style="flex:1;min-width:0" class="small"><span>Sei regole non hanno mai fatto nulla negli ultimi 90 giorni</span><span class="muted">, e due port forward non ricevono traffico dal giorno in cui sono stati creati.</span></div>'
+ +'<button class="btn sm">Rivedi</button></div>';
+}
+
+function histoHtml(list){
+ var b=[];for(var i=0;i<HOUR;i++)b.push([0,0]);
+ list.forEach(function(e){b[e.min][(e.cons==='blocked'||e.cons==='security')?1:0]++});
+ var mx=Math.max.apply(null,b.map(function(p){return p[0]+p[1]}))||1,h='';
+ for(var m=0;m<HOUR;m++){
+  var tt=b[m][0]+b[m][1],hb=Math.round(b[m][1]/mx*64),ha=Math.round(b[m][0]/mx*64);
+  var off=S.range&&(m<S.range[0]||m>S.range[1]);
+  h+='<div class="hb'+(off?' off':'')+'" data-m="'+m+'" title="'+tt+' eventi"><i style="height:'+hb+'px;background:var(--dg-fill)"></i><i style="height:'+Math.max(ha,tt?2:0)+'px;background:var(--pri)"></i></div>';
+ }
+ return h;
+}
+function grouped(list){
+ var out=[],map={};
+ list.forEach(function(e){
+  var c=CAT[e.eid];
+  if(c.noise!=='high'){out.push({e:e,n:1});return}
+  var k=e.eid+'|'+e.src+'|'+e.dst+'|'+e.rule;
+  if(map[k]){map[k].n++;return}
+  map[k]={e:e,n:1};out.push(map[k]);
+ });
+ return out;
+}
+function tableHtml(list,compact){
+ var g=grouped(list);
+ if(!g.length)return '';
+ var h='<table class="ev"><colgroup><col style="width:76px"><col style="width:104px"><col style="width:150px"><col><col style="width:74px"></colgroup>'
+ +'<thead><tr><th>Ora</th><th>Categoria</th><th>Host o sorgente</th><th>Evento</th><th>Esito</th></tr></thead><tbody>';
+ g.slice(0,compact||120).forEach(function(x){
+  var e=x.e;
+  h+='<tr class="r'+(S.sel===e.id?' sel':'')+'" data-id="'+e.id+'">'
+  +'<td class="mono">'+hms(e.ts)+'</td>'
+  +'<td><span class="sv" style="background:'+dotOf(e.cons)+'"></span>'+e.cat+'</td>'
+  +'<td>'+(e.src?(HOSTS[e.src]?esc(HOSTS[e.src].n):esc(e.src)):'<span class="muted">'+esc(e.tunnel||e.iface||'-')+'</span>')+'</td>'
+  +'<td>'+esc(label(e))+(x.n>1?'<span class="cnt">×'+x.n+'</span>':'')+'</td>'
+  +'<td>'+pillOf(e.act)+'</td></tr>';
+ });
+ return h+'</tbody></table>';
+}
+
+function vExplore(){
+ var list=res(), v=verdict(list);
+ var chips=S.tokens.map(function(t,i){return '<span class="chip"><b>'+esc(t.k)+'</b>'+esc(t.k==='event'?t.v:'='+t.v)+'<button data-rm="'+i+'" aria-label="Rimuovi"><svg class="ic" style="width:12px;height:12px"><path d="M6 6l12 12M18 6L6 18"/></svg></button></span>'}).join('');
+ var srcTok=S.tokens.filter(function(t){return t.k==='src'||t.k==='host'})[0];
+ var empty='';
+ if(!list.length){
+  var known=srcTok?(HOSTS[srcTok.v]||hostByName(srcTok.v)):null;
+  empty='<div class="card empty"><svg class="ic" style="width:26px;height:26px;color:var(--tx3)"><circle cx="12" cy="12" r="9"/><path d="M12 8v4M12 16h.01"/></svg>'
+  +'<div style="font-size:15px;margin-top:9px">'+(srcTok?'Il firewall non ha visto alcun pacchetto da '+esc(srcTok.v)+' nell\'ultima ora.':'Nessun evento con questi filtri.')+'</div>'
+  +'<div class="small muted" style="max-width:520px;margin:6px auto 0">'
+  +(srcTok?(known?'L\'host è noto e ha un lease attivo, ma non sta generando traffico. Il problema è a monte del firewall: cavo, porta dello switch, VLAN o configurazione di rete del client.'
+    :'Questo indirizzo non è mai comparso nei log e non ha un lease DHCP: verifica che il client sia acceso, collegato e sulla VLAN giusta.')
+   :'I filtri attivi escludono tutto. La categoria del traffico consentito è attiva, quindi il dato ci sarebbe.')+'</div>'
+  +'<div class="row" style="justify-content:center;margin-top:12px;flex-wrap:wrap">'
+  +(srcTok?'<button class="btn sm" data-lease="1">Cerca nei lease DHCP</button>':'')
+  +'<button class="btn sm" data-clear="1">Rimuovi tutti i filtri</button>'
+  +'<button class="btn sm" data-live="1">Guarda in Live mentre l\'utente riprova</button></div></div>';
+ }
+ function fb(key,title,items){
+  var set=baseSet().filter(function(e){return fOk(e,key)&&tOk(e)}),cn={};
+  set.forEach(function(e){var v=key==='cons'?e.cons:e.cat;cn[v]=(cn[v]||0)+1});
+  var l=items||Object.keys(cn).sort(function(a,b){return cn[b]-cn[a]});
+  return '<h4 class="sec" style="margin-top:14px">'+title+'</h4>'+l.map(function(v){
+   var on=S[key].indexOf(v)>-1;
+   return '<div class="fx'+(on?' on':'')+'" data-fk="'+key+'" data-fv="'+esc(v)+'"><span><span class="cb">'+(on?'<svg class="ic" style="width:10px;height:10px;stroke-width:3"><path d="M4 12l5 5L20 6"/></svg>':'')+'</span>'+esc(key==='cons'?CONS[v].l:v)+'</span><span class="n">'+nf(cn[v]||0)+'</span></div>';
+  }).join('');
+ }
+ return head('Log e report','Monitoraggio')+tabs('explore')
+ +'<div class="qbar"><div class="qbox">'+chips+'<input id="q" placeholder="'+(S.tokens.length?'aggiungi un filtro e premi Invio':'src=192.168.1.44   rule=RETE-IOT_DNS_E   action=drop')+'"></div>'
+ +'<select class="sel"><option>Ultima ora</option><option>Ultime 24 ore</option><option'+(S.deg?' disabled':'')+'>Ultimi 30 giorni</option></select>'
+ +'<button class="btn" id="perma"><svg class="ic"><path d="M9 15l6-6M8 8h-.5a4.5 4.5 0 000 9H10M14 17h.5a4.5 4.5 0 000-9H12"/></svg>Copia link</button></div>'
+ +(v?'<div class="verd '+v.c+'"><div>'+esc(v.t)+'</div><div class="s">'+esc(v.s)+'</div></div>':'')
+ +'<div class="card pad" style="margin-bottom:14px"><div class="row" style="margin-bottom:6px"><span class="mini">Eventi al minuto</span><div class="sp"></div><span class="mini"><span style="display:inline-block;width:8px;height:8px;background:var(--pri);border-radius:2px"></span> consentiti <span style="display:inline-block;width:8px;height:8px;background:var(--dg-fill);border-radius:2px;margin-left:6px"></span> bloccati</span></div>'
+ +'<div class="histo" id="histo">'+histoHtml(baseSet().filter(function(e){return fOk(e,null)}))+'</div>'
+ +'<div class="row mini" style="margin-top:4px"><span>'+p2(tsOf(0,0).getHours())+':'+p2(tsOf(0,0).getMinutes())+'</span><div class="sp" style="text-align:center">'+(S.range?'intervallo ristretto · <span class="lnk" id="clrr">annulla</span>':'trascina per restringere l\'intervallo')+'</div><span>'+p2(NOW.getHours())+':'+p2(NOW.getMinutes())+'</span></div></div>'
+ +'<div class="grid"><div class="card pad">'+fb('cons','Conseguenza',['blocked','degraded','security','change','info'])+fb('cat','Categoria',null)+'</div>'
+ +'<div>'+(empty||'<div class="card" style="overflow:hidden">'+tableHtml(list)+'</div>')+'</div></div>';
+}
+
+function vHost(){
+ var ip=S.route.a, h=HOSTS[ip];
+ var list=DATA.filter(function(e){return e.src===ip});
+ var blocked=list.filter(function(e){return e.cons==='blocked'});
+ var hd=head(h?h.n:ip,'<span class="lnk" data-tab="overview">Log e report</span> / Host');
+ if(!h&&!list.length){
+  return hd+'<div class="card empty" style="margin-top:16px"><svg class="ic" style="width:26px;height:26px;color:var(--tx3)"><circle cx="12" cy="12" r="9"/><path d="M12 8v4M12 16h.01"/></svg>'
+  +'<div style="font-size:15px;margin-top:9px">'+esc(ip)+' non è mai comparso nei log.</div>'
+  +'<div class="small muted" style="max-width:540px;margin:6px auto 0">Nessun lease DHCP, nessun pacchetto, nessuna richiesta DNS nelle ultime 24 ore. Il firewall non vede questo dispositivo: il problema è a monte, tra il client e il firewall. Verifica cavo, porta dello switch, VLAN e configurazione IP del client.</div>'
+  +'<div class="row" style="justify-content:center;margin-top:12px;flex-wrap:wrap"><button class="btn sm" data-live="1">Guarda in Live mentre l\'utente riprova</button><button class="btn sm">Apri i lease DHCP</button><button class="btn sm" data-tab="overview">Torna alla panoramica</button></div></div>';
+ }
+ var bars=[],r2=rng(4242);
+ for(var i=0;i<24;i++){var blk=i>=14?ri(18,29):0;bars.push([i>=14?ri(0,2):ri(3,9),blk])}
+ var mx=30;
+ var vd=blocked.length/Math.max(list.length,1)>0.8
+  ?{c:'d',t:'Questo dispositivo non riesce a risolvere alcun nome da 9 ore.',s:'Interroga DNS pubblici che la zona '+(h?h.z:'-')+' non consente. Nessuna sua sessione verso internet è andata a buon fine oggi.'}
+  :{c:'n',t:'Attività regolare, '+nf(blocked.length)+' blocchi su '+nf(list.length)+' eventi.',s:'Nessuna concentrazione anomala nell\'ultima ora.'};
+ return hd
+ +'<div class="small muted" style="margin:4px 0 14px">'+esc(ip)+(h?' · '+h.mac+' · zona '+h.z+' su '+h.if+' · visto la prima volta il '+h.seen:'')+'</div>'
+ +'<div class="verd '+vd.c+'"><div>'+esc(vd.t)+'</div><div class="s">'+esc(vd.s)+'</div></div>'
+ +'<div class="row" style="margin-bottom:14px;flex-wrap:wrap"><button class="btn sm">Blocca host</button><button class="btn sm">Lease DHCP</button><button class="btn sm" data-explore-src="'+esc(ip)+'">Tutti gli eventi in Esplora</button><button class="btn sm" data-live="1">Vedi in Live</button></div>'
+ +'<div class="card pad" style="margin-bottom:14px"><div class="row" style="margin-bottom:6px"><span class="mini">Attività nelle ultime 24 ore</span><div class="sp"></div><span class="mini">i blocchi iniziano alle 07:00</span></div>'
+ +'<div style="display:flex;align-items:flex-end;gap:3px;height:56px">'
+ +bars.map(function(p){return '<div style="flex:1;display:flex;flex-direction:column;justify-content:flex-end;gap:1px"><i style="display:block;height:'+Math.round(p[1]/mx*50)+'px;background:var(--dg-fill);border-radius:2px 2px 0 0"></i><i style="display:block;height:'+Math.max(Math.round(p[0]/mx*50),1)+'px;background:var(--pri);border-radius:0 0 2px 2px"></i></div>'}).join('')
+ +'</div></div>'
+ +'<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:14px;margin-bottom:14px">'
+ +'<div class="card pad"><h2 style="margin-bottom:9px">Bloccato da</h2><div class="lst">'+(topBy(blocked,'rule',4).map(function(p){return '<div class="i"><span class="lnk" data-rule="'+esc(p[0])+'">'+esc(p[0])+'</span><span class="muted">'+nf(p[1]*14)+'</span></div>'}).join('')||'<div class="muted small">Nessun blocco.</div>')+'</div></div>'
+ +'<div class="card pad"><h2 style="margin-bottom:9px">Destinazioni tentate</h2><div class="lst">'+(topBy(list,'dst',4).map(function(p){return '<div class="i"><span>'+esc(p[0])+'</span><span class="muted">'+nf(p[1]*14)+'</span></div>'}).join('')||'<div class="muted small">Nessuna.</div>')+'</div></div>'
+ +'</div>'
+ +'<div class="card" style="overflow:hidden"><div class="pad" style="border-bottom:1px solid var(--bd);display:flex;align-items:center"><h2>Eventi recenti</h2><div class="sp"></div><span class="lnk small" data-explore-src="'+esc(ip)+'">Vedi tutti</span></div>'+tableHtml(list,12)+'</div>';
+}
+
+function vRule(){
+ var name=S.route.a, list=DATA.filter(function(e){return e.rule===name});
+ var srcs=topBy(list,'src',5);
+ return head(name,'<span class="lnk" data-tab="overview">Log e report</span> / Regola')
+ +'<div class="small muted" style="margin:4px 0 14px">Regola firewall · zona '+(list[0]?list[0].zone:'-')+' · '+nf(list.length*14)+' occorrenze nelle ultime 24 ore</div>'
+ +'<div class="verd '+(list.length>20?'d':'n')+'"><div>'+(list.length>20?'Questa regola è la causa principale dei blocchi di '+(srcs[0]&&HOSTS[srcs[0][0]]?HOSTS[srcs[0][0]].n:'un solo host')+'.':'Occorrenze regolari, distribuite su '+srcs.length+' sorgenti.')+'</div>'
+ +'<div class="s">'+(list.length>20?'Il '+Math.round((srcs[0]?srcs[0][1]:0)/list.length*100)+'% delle occorrenze viene da un unico dispositivo: probabile errore di configurazione del client, non della regola.':'Nessuna concentrazione su un singolo host.')+'</div></div>'
+ +'<div class="row" style="margin-bottom:14px;flex-wrap:wrap"><button class="btn sm">Apri la regola nel firewall</button><button class="btn sm">Disabilita temporaneamente</button><button class="btn sm" data-explore-rule="'+esc(name)+'">Tutti gli eventi in Esplora</button>'
+ +(list[0]?'<button class="btn sm" data-sim="1" data-sim-src="'+esc(list[0].src)+'" data-sim-dst="'+esc(list[0].dst)+'" data-sim-dport="'+esc(list[0].dport)+'" data-sim-proto="'+esc(list[0].proto||'tcp')+'" data-sim-iface="'+esc(list[0].iface||'eth0')+'">Prova un pacchetto</button>':'')+'</div>'
+ +'<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:14px;margin-bottom:14px">'
+ +'<div class="card pad"><h2 style="margin-bottom:9px">Sorgenti coinvolte</h2><div class="lst">'+srcs.map(function(p){return '<div class="i"><span class="lnk" data-host="'+esc(p[0])+'">'+esc(HOSTS[p[0]]?HOSTS[p[0]].n:p[0])+'</span><span class="muted">'+nf(p[1]*14)+'</span></div>'}).join('')+'</div></div>'
+ +'<div class="card pad"><h2 style="margin-bottom:9px">Destinazioni</h2><div class="lst">'+topBy(list,'dst',5).map(function(p){return '<div class="i"><span>'+esc(p[0])+'</span><span class="muted">'+nf(p[1]*14)+'</span></div>'}).join('')+'</div></div></div>'
+ +'<div class="card" style="overflow:hidden">'+tableHtml(list,12)+'</div>';
+}
+
+function vTunnel(){
+ var name=S.route.a;
+ var list=DATA.filter(function(e){return e.tunnel===name});
+ var down=list.filter(function(e){return e.eid==='vpn.ipsec.tunnel.down'});
+ return head(name,'<span class="lnk" data-tab="overview">Log e report</span> / Tunnel IPsec')
+ +'<div class="small muted" style="margin:4px 0 14px">Peer 93.51.7.204 · sottoreti 192.168.1.0/24 ↔ 172.16.8.0/24 · su eth1</div>'
+ +'<div class="verd w"><div>Il tunnel è attivo adesso, ma instabile: '+list.length+' eventi nell\'ultima ora, di cui '+down.length+' cadute.</div>'
+ +'<div class="s">Le rinegoziazioni frequenti indicano perdita di pacchetti sulla linea, non un errore di configurazione: i parametri dei due peer concordano, altrimenti il tunnel non salirebbe affatto.</div></div>'
+ +'<div class="row" style="margin-bottom:14px;flex-wrap:wrap"><button class="btn sm">Apri la configurazione del tunnel</button><button class="btn sm">Riavvia il tunnel</button><button class="btn sm" data-explore-tunnel="'+esc(name)+'">Tutti gli eventi in Esplora</button></div>'
+ +'<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:12px;margin-bottom:14px">'
+ +'<div class="kpi"><div class="l">Eventi nell\'ora</div><div class="v">'+list.length+'</div></div>'
+ +'<div class="kpi"><div class="l">Cadute</div><div class="v">'+down.length+'</div></div>'
+ +'<div class="kpi"><div class="l">Media 7 giorni</div><div class="v">2/g</div></div>'
+ +'<div class="kpi"><div class="l">Stato</div><div class="v" style="font-size:17px;color:var(--ok)">attivo</div></div></div>'
+ +'<div class="card" style="overflow:hidden">'+tableHtml(list,14)+'</div>';
+}
+
+var LIVE=[],lt=null,lid=90000;
+function vLive(){
+ return head('Log e report','Monitoraggio')+tabs('live')
+ +'<div class="qbar"><button class="btn '+(S.live?'':'pri')+'" id="pp">'+(S.live?'<svg class="ic"><path d="M8 5v14M16 5v14"/></svg>Pausa':'<svg class="ic"><path d="M7 4l12 8-12 8z"/></svg>Riprendi')+'</button>'
+ +'<span class="small muted">'+(S.live?'<span class="sv" style="background:var(--ok);width:8px;height:8px"></span>tail attivo · un evento ogni secondo circa':'in pausa')+'</span>'
+ +'<div class="sp"></div><span class="mini">utile mentre chiedi all\'utente di riprovare</span></div>'
+ +'<div class="card" id="lb" style="overflow:hidden">'+(LIVE.length?tableHtml(LIVE,14):'<div class="empty muted">In attesa di eventi…</div>')+'</div>';
+}
+function tick(){
+ var t=tp(),e=t.mk(),c=CAT[t.eid];
+ e.id=++lid;e.eid=t.eid;e.min=HOUR-1;e.ts=new Date();e.cat=c.cat;e.act=c.act;e.cons=c.cons;
+ if(!e.host&&HOSTS[e.src])e.host=HOSTS[e.src].n;
+ LIVE.unshift(e);if(LIVE.length>30)LIVE.pop();
+ if(S.route.n==='live'){var b=document.getElementById('lb');if(b)b.innerHTML=tableHtml(LIVE,14)}
+}
+
+var VERB=[['Traffico consentito','Solo nuove sessioni','200/s','58%'],['Traffico bloccato','Tutto','nessuno','19%'],['Richieste DNS dei client','Solo blocchi','50/s','11%'],['DPI e applicazioni','Solo blocchi','nessuno','6%'],['Threat shield','Tutto','nessuno','4%'],['Modifiche amministrative','Tutto con diff','nessuno','2%']];
+function vSettings(){
+ return head('Log e report','Monitoraggio')+tabs('settings')
+ +(S.deg?'<div class="banner w" style="margin-bottom:14px"><svg class="ic"><path d="M12 4l9 16H3zM12 10v4M12 17h.01"/></svg><div>Nessuno storage persistente: i log restano in RAM, retention 7 giorni con tetto di 50 MB. Gli intervalli lunghi sono disattivati e la Panoramica perde i confronti con i periodi precedenti.</div></div>':'')
+ +'<div class="card pad" style="margin-bottom:14px"><div class="row" style="margin-bottom:12px"><h2>Archivio locale</h2><div class="sp"></div><span class="small muted">simula appliance senza storage</span><button class="sw'+(S.deg?'':' on')+'" id="deg" aria-label="Storage"><i></i></button></div>'
+ +'<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:8px 24px">'
+ +[['Percorso',S.deg?'/var/lib/victoria-logs-data':'/mnt/data/victoria-logs-data'],['Retention',S.deg?'7 giorni':'12 mesi'],['Ingest','310 eventi/s'],['Occupazione',S.deg?'38 MB di 50 MB':'7,4 GB di 64 GB']]
+ .map(function(p){return '<div class="row small" style="border-bottom:1px solid var(--bd);padding-bottom:6px"><span class="muted">'+p[0]+'</span><div class="sp"></div><span>'+p[1]+'</span></div>'}).join('')
+ +'</div><div class="bar" style="margin:12px 0 6px"><i style="width:'+(S.deg?'76%':'12%')+';background:'+(S.deg?'var(--wr-fill)':'var(--pri)')+'"></i></div>'
+ +'<div class="mini">'+(S.deg?'Il buffer si riempie in circa 4 ore, poi i log più vecchi vengono scartati.':'Al ritmo attuale 12 mesi di log occuperanno circa 21 GB.')+'</div></div>'
+ +'<div class="card pad"><h2>Categorie e verbosità</h2><div class="small muted" style="margin:3px 0 12px">Il rate limit protegge la CPU: gli eventi in eccesso vengono contati e non scritti.</div>'
+ +'<table class="ev" style="table-layout:auto"><thead><tr><th>Categoria</th><th style="width:210px">Livello</th><th style="width:110px">Rate limit</th><th style="width:120px">Retention</th><th style="width:80px">Quota</th></tr></thead><tbody>'
+ +VERB.map(function(r){return '<tr><td>'+r[0]+'</td><td><select class="sel" style="height:30px;width:100%"><option>'+r[1]+'</option><option>Tutto</option><option>Disattivato</option></select></td><td class="small muted">'+r[2]+'</td><td class="small muted">'+(r[0].indexOf('DNS')>-1?'90 giorni':S.deg?'7 giorni':'12 mesi')+'</td><td class="small muted">'+r[3]+'</td></tr>'}).join('')
+ +'</tbody></table><div class="row" style="margin-top:14px"><button class="btn pri">Salva</button><button class="btn">Annulla</button><div class="sp"></div><span class="mini">le modifiche non sono persistenti in questo prototipo</span></div></div>';
+}
+
+/* ---------- Simulatore di percorso ---------- */
+var IFZ={'eth0':'lan','eth0.20':'iot','eth1':'wan','tun0':'vpn'};
+var FWIP={'192.168.1.1':1,'10.181.181.1':1,'10.181.181.253':1,'88.44.12.7':1};
+var RULES=[
+ {ch:'iot>wan',n:'RETE-IOT_NTP',proto:'udp',dport:123,dst:'*',act:'accept'},
+ {ch:'iot>wan',n:'RETE-IOT_DNS_I',proto:'udp',dport:53,dst:'10.181.181.253',act:'accept'},
+ {ch:'iot>wan',n:'RETE-IOT_MQTT',proto:'tcp',dport:1883,dst:'*',act:'accept'},
+ {ch:'iot>wan',n:'RETE-IOT_DNS_E',proto:'udp',dport:53,dst:'*',act:'drop'},
+ {ch:'lan>wan',n:'DPI-STREAMING',proto:'*',dport:'*',dst:'*',act:'skip',note:'filtro applicativo, non valutabile staticamente'},
+ {ch:'lan>wan',n:'LAN-OUT_ANY',proto:'*',dport:'*',dst:'*',act:'accept'},
+ {ch:'lan>fw',n:'ADMIN-UI',proto:'tcp',dport:9090,dst:'*',act:'accept'},
+ {ch:'wan>lan',n:'PF-WEB-SERVER',proto:'tcp',dport:8443,dst:'192.168.1.10',act:'accept'},
+ {ch:'wan>fw',n:'ALLOW-VPN',proto:'udp',dport:1194,dst:'*',act:'accept'},
+ {ch:'vpn>lan',n:'VPN-FULL-ACCESS',proto:'*',dport:'*',dst:'*',act:'accept'}
+];
+var ZPOL={'iot>wan':'reject','iot>lan':'drop','lan>wan':'accept','lan>fw':'accept','wan>fw':'drop','wan>lan':'drop','vpn>lan':'accept','iot>fw':'drop'};
+var DNAT={n:'PF-WEB-SERVER',iface:'eth1',proto:'tcp',dport:443,toIp:'192.168.1.10',toPort:8443};
+function zoneOfIp(ip){if(!ip)return 'wan';if(ip.indexOf('192.168.1.')===0)return 'lan';if(ip.indexOf('10.181.181.')===0)return 'iot';if(ip.indexOf('10.9.9.')===0)return 'vpn';return 'wan'}
+function why(r,p){
+ if(r.proto!=='*'&&r.proto!==p.proto)return ['protocollo',r.proto,p.proto];
+ if(r.dport!=='*'&&String(r.dport)!==String(p.dport))return ['porta',r.dport,p.dport];
+ if(r.dst!=='*'&&r.dst!==p.dst)return ['destinazione',r.dst,p.dst];
+ return null;
+}
+function simulate(p){
+ var st=[],zs=IFZ[p.iface]||'lan',dst=p.dst,dport=p.dport,rewrote=null,verdict=null;
+ st.push({k:'ok',t:'Ingresso da '+p.iface+', assegnato alla zona '+zs});
+ if(BAD.indexOf(p.src)>-1){
+  st.push({k:'no',t:'Threat Shield IP: la sorgente è in blocklist, pacchetto scartato prima delle regole',
+   s:'La decisione avviene nel set di prerouting: nessuna regola del firewall viene valutata.'});
+  return {st:st,v:{c:'d',t:'Il pacchetto viene fermato da Threat Shield, non da una regola.',s:'La sorgente '+p.src+' è presente in una lista di reputazione. Cercare una regola responsabile non porterebbe da nessuna parte.'},act:'block',rule:'ts-blocklist'};
+ }
+ st.push({k:'ok',t:'Threat Shield IP: sorgente non presente in nessuna blocklist'});
+ st.push({k:'ok',t:'Conntrack: nuova sessione, nessuna corrispondenza con connessioni esistenti'});
+ if(p.iface===DNAT.iface&&p.proto===DNAT.proto&&String(p.dport)===String(DNAT.dport)&&FWIP[dst]){
+  rewrote={from:dst+':'+dport,to:DNAT.toIp+':'+DNAT.toPort};
+  dst=DNAT.toIp;dport=DNAT.toPort;
+  st.push({k:'nat',t:'NAT in prerouting: la regola '+DNAT.n+' riscrive la destinazione',
+   s:'Da '+rewrote.from+' a '+rewrote.to+'. Da qui in avanti viene valutato il pacchetto riscritto.'});
+ }else{
+  st.push({k:'ok',t:'NAT in prerouting: nessuna regola di destinazione applicabile'});
+ }
+ var zd=FWIP[dst]?'fw':zoneOfIp(dst), ch=zs+'>'+zd;
+ var pk={proto:p.proto,dport:dport,dst:dst,src:p.src};
+ var list=RULES.filter(function(r){return r.ch===ch}),tried=[],hit=null,skipped=null;
+ for(var i=0;i<list.length;i++){
+  var r=list[i],w=why(r,pk);
+  if(w){tried.push({n:r.n,w:w});continue}
+  if(r.act==='skip'){skipped=r;tried.push({n:r.n,skip:1});continue}
+  hit=r;break;
+ }
+ var pol=ZPOL[ch]||'drop';
+ st.push({k:hit?(hit.act==='accept'?'chain-ok':'chain-no'):(pol==='accept'?'chain-ok':'chain-no'),
+  t:'Catena '+(zd==='fw'?'input ':'forward ')+zs+' → '+zd+', '+list.length+' regole valutate',
+  rules:tried,hit:hit,pol:hit?null:pol,ch:ch});
+ var act=hit?hit.act:(pol==='accept'?'accept':pol);
+ if(act==='accept'){
+  st.push({k:'ok',t:'Instradamento: uscita da eth1 (wan1) '+(zd==='wan'?'con masquerade in postrouting':'verso la rete locale'),
+   s:zd==='wan'?'Con mwan3 attivo, un cambio di linea cambierebbe l\'indirizzo pubblico di uscita.':''});
+  if(skipped)st.push({k:'warn',t:'Filtro applicativo '+skipped.n+' presente su questa catena',s:'Lavora sul flusso e non sul singolo pacchetto: la simulazione non può dire se bloccherebbe questa sessione.'});
+  verdict={c:'n',t:'Il pacchetto viene consentito'+(hit?' dalla regola '+hit.n+'.':' dalla politica della zona '+zs+' → '+zd+'.'),
+   s:rewrote?'La destinazione è stata riscritta dal NAT: il pacchetto arriva a '+rewrote.to+', non a '+rewrote.from+'. Se il servizio non risponde, il problema è sull\'host interno.':'Se il traffico comunque non passa, guarda il ritorno, il filtro applicativo o il servizio di destinazione.'};
+ }else if(hit){
+  st.push({k:'off',t:'Politica della zona, postrouting, filtro applicativo',s:'Non raggiunti: la decisione è già stata presa.'});
+  verdict={c:'d',t:'Il pacchetto viene '+(hit.act==='drop'?'scartato':'rifiutato')+' dalla regola '+hit.n+'.',
+   s:hit.act==='drop'?'Il client non riceve risposta e va in timeout.':'Il client riceve un errore immediato di connessione rifiutata.'};
+ }else{
+  st.push({k:'off',t:'Postrouting e filtro applicativo',s:'Non raggiunti: la decisione è già stata presa.'});
+  verdict={c:'d',t:'Nessuna regola corrisponde: decide la politica della zona '+zs+' → '+zd+', impostata su '+pol+'.',
+   s:'Non c\'è una regola responsabile da correggere: per consentire questo traffico va aggiunta una regola, non modificata una esistente.'};
+ }
+ return {st:st,v:verdict,act:act,rule:hit?hit.n:'politica di zona',rewrote:rewrote};
+}
+var SCEN=[
+ {l:'DNS di una telecamera',src:'10.181.181.105',dst:'8.8.8.8',dport:53,proto:'udp',iface:'eth0.20'},
+ {l:'NAS iot verso la LAN',src:'10.181.181.108',dst:'192.168.1.10',dport:445,proto:'tcp',iface:'eth0.20'},
+ {l:'Port forward dal web',src:'203.0.113.9',dst:'88.44.12.7',dport:443,proto:'tcp',iface:'eth1'},
+ {l:'Scansione dalla WAN',src:'185.220.101.34',dst:'10.181.181.1',dport:22,proto:'tcp',iface:'eth1'}
+];
+function simEvents(p){return DATA.filter(function(e){return e.src===p.src&&String(e.dport)===String(p.dport)}).length}
+function fld(id,lab,val,opts){
+ var inner=opts?'<select class="sel" id="'+id+'" style="width:100%;height:32px">'+opts.map(function(o){return '<option'+(o===val?' selected':'')+'>'+o+'</option>'}).join('')+'</select>'
+  :'<input id="'+id+'" value="'+esc(val)+'" style="width:100%;height:32px;border:1px solid var(--bd2);border-radius:6px;background:var(--card);padding:0 8px;font-family:var(--mono);font-size:12px">';
+ return '<div><div class="mini" style="margin-bottom:3px">'+lab+'</div>'+inner+'</div>';
+}
+function vSimulate(){
+ var p=S.sim,r=p.res;
+ var h=head('Log e report','Monitoraggio')+tabs('simulate')
+ +'<div class="card pad" style="margin-bottom:14px">'
+ +'<div class="row" style="margin-bottom:10px;flex-wrap:wrap"><span class="mini">Scenari di esempio</span>'
+ +SCEN.map(function(s,i){return '<button class="btn sm" data-scen="'+i+'">'+s.l+'</button>'}).join('')+'</div>'
+ +'<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(135px,1fr));gap:10px;margin-bottom:11px">'
+ +fld('s-src','Sorgente',p.src)+fld('s-dst','Destinazione',p.dst)+fld('s-dport','Porta',p.dport)
+ +fld('s-proto','Protocollo',p.proto,['tcp','udp','icmp'])+fld('s-iface','Ingresso',p.iface,['eth0','eth0.20','eth1','tun0'])
+ +'</div>'
+ +'<div class="row" style="flex-wrap:wrap"><button class="btn pri" id="simrun">Simula</button>'
+ +'<button class="btn" id="simtrace"'+(p.tracing?' disabled':'')+'>'+(p.tracing?'In ascolto…':'Traccia reale per 20 s')+'</button>'
+ +'<span class="mini">'+(p.tracing?'chiedi all\'utente di riprovare adesso':'la traccia richiede che qualcuno generi davvero il traffico')+'</span></div>'
+ +'</div>';
+ if(p.tracing)return h+'<div class="card empty"><div class="muted">Traccia attiva su '+esc(p.src)+' → '+esc(p.dst)+':'+esc(p.dport)+'. In attesa di pacchetti…</div></div>';
+ if(!r)return h+'<div class="card empty"><div style="font-size:15px">Inserisci i parametri di un pacchetto e premi Simula.</div><div class="small muted" style="max-width:520px;margin:6px auto 0">La simulazione valuta il ruleset attivo senza generare traffico: utile anche di notte, e soprattutto prima di applicare una modifica.</div></div>';
+ h+=(p.trace?'<div class="banner w" style="margin-bottom:12px"><svg class="ic"><path d="M12 4l9 16H3z"/></svg><div>Risultato della traccia reale su un pacchetto osservato alle '+hms(new Date())+'. Include lo stato del conntrack e l\'instradamento effettivo, che la simulazione statica non può conoscere.</div></div>':'')
+ +'<div class="verd '+r.v.c+'"><div>'+esc(r.v.t)+'</div><div class="s">'+esc(r.v.s)+'</div></div>'
+ +'<div class="card" style="margin-bottom:14px;overflow:hidden">';
+ r.st.forEach(function(s,i){
+  var col=s.k==='ok'||s.k==='chain-ok'?'var(--ok)':s.k==='no'||s.k==='chain-no'?'var(--dg-fill)':s.k==='nat'||s.k==='warn'?'var(--wr-fill)':'var(--bd2)';
+  var icon=s.k==='ok'||s.k==='chain-ok'?'M4 12l5 5L20 6':s.k==='no'?'M6 6l12 12M18 6L6 18':s.k==='nat'?'M4 8h12l-3-3M20 16H8l3 3':s.k==='off'?'M6 12h12':'M12 8v5M12 16h.01';
+  h+='<div style="padding:10px 13px;border-top:'+(i?'1px solid var(--bd)':'0')+';border-left:3px solid '+col+';'+(s.k==='off'?'opacity:.55;':'')+'">'
+   +'<div style="display:flex;gap:10px;align-items:flex-start"><svg class="ic" style="color:'+col+';margin-top:2px"><path d="'+icon+'"/></svg>'
+   +'<div style="flex:1;min-width:0"><div>'+esc(s.t)+'</div>'+(s.s?'<div class="small muted" style="margin-top:2px">'+esc(s.s)+'</div>':'')+'</div></div>';
+  if(s.rules){
+   h+='<div style="margin-left:26px;margin-top:8px;font-size:12px">';
+   s.rules.forEach(function(x){
+    h+='<div style="display:flex;gap:8px;padding:5px 0;border-bottom:1px solid var(--bd);align-items:baseline">'
+     +'<svg class="ic" style="width:13px;height:13px;color:var(--tx3)"><path d="M6 6l12 12M18 6L6 18"/></svg>'
+     +'<span style="flex:1;min-width:0">'+esc(x.n)+'</span>'
+     +'<span class="muted">'+(x.skip?'valutata sul flusso, non qui':esc(x.w[0])+' '+esc(x.w[1])+' ≠ <span style="color:var(--dg)">'+esc(x.w[2])+'</span>')+'</span></div>';
+   });
+   if(s.hit)h+='<div style="display:flex;gap:8px;padding:7px 6px;margin:2px -6px 0;align-items:baseline;background:'+(s.hit.act==='accept'?'var(--ok-bg)':'var(--dg-bg)')+';border-radius:6px;color:'+(s.hit.act==='accept'?'var(--ok)':'var(--dg)')+'">'
+    +'<svg class="ic" style="width:13px;height:13px"><circle cx="12" cy="12" r="5" fill="currentColor" stroke="none"/></svg>'
+    +'<span style="flex:1;min-width:0">'+esc(s.hit.n)+'</span><span>corrisponde su tutti i campi → '+s.hit.act+'</span></div>';
+   if(s.pol)h+='<div style="display:flex;gap:8px;padding:7px 6px;margin:2px -6px 0;align-items:baseline;background:var(--dg-bg);border-radius:6px;color:var(--dg)">'
+    +'<svg class="ic" style="width:13px;height:13px"><circle cx="12" cy="12" r="5" fill="currentColor" stroke="none"/></svg>'
+    +'<span style="flex:1;min-width:0">Politica predefinita della zona</span><span>nessuna regola corrisponde → '+s.pol+'</span></div>';
+   h+='</div>';
+  }
+  h+='</div>';
+ });
+ h+='</div>';
+ if(!p.trace)h+='<div class="banner w" style="margin-bottom:14px"><svg class="ic"><path d="M12 8v5M12 16h.01"/><circle cx="12" cy="12" r="9"/></svg><div>Filtro applicativo e IPS lavorano sul flusso, non sul singolo pacchetto: la simulazione non li valuta. Il risultato riflette la configurazione salvata e riguarda il primo pacchetto di una sessione nuova. Se qui è consentito ma il traffico non passa, usa la traccia reale.</div></div>';
+ var ev=simEvents(p);
+ h+='<div class="row" style="flex-wrap:wrap">'
+ +(r.rule&&r.rule!=='politica di zona'&&r.rule!=='ts-blocklist'?'<button class="btn sm" data-rule="'+esc(r.rule)+'">Apri la regola</button>':'')
+ +'<button class="btn sm">'+(r.act==='accept'?'Aggiungi un blocco e risimula':'Crea eccezione e risimula')+'</button>'
+ +(ev?'<button class="btn sm" data-simev="1">Eventi reali corrispondenti ('+nf(ev)+')</button>':'<span class="mini">nessun evento reale corrispondente nell\'ultima ora</span>')
+ +'<button class="btn sm" id="perma">Copia link</button></div>';
+ return h;
+}
+
+function drawer(){
+ var d=document.getElementById('drawer');
+ var e=DATA.concat(LIVE).filter(function(x){return x.id===S.sel})[0];
+ if(!e){d.className='dr';d.innerHTML='';return}
+ var c=CAT[e.eid], co=CONS[c.cons];
+ var raw='kernel: '+(e.act==='allow'?'ALLOW':'DROP')+'-'+e.rule+' IN='+(e.iface||'-')+' OUT= MAC='+(HOSTS[e.src]?HOSTS[e.src].mac:'08:35:71:f0:e4:8a')+':08:00 SRC='+(e.src||'-')+' DST='+(e.dst||'-')+' LEN=58 TTL=64 ID='+ri(1000,60000)+' PROTO='+(e.proto||'-').toUpperCase()+' <span class="dot" title="Porta sorgente">SPT</span>='+e.sport+' <span class="dot" title="Porta di destinazione">DPT</span>='+e.dport;
+ var kv=[['Evento',e.eid],['Conseguenza',co.l],['Ora',hms(e.ts)+' · 7 set 2026'],['Sorgente',(e.src||'-')+(e.sport?':'+e.sport:'')],['Host',e.host||'-'],['Destinazione',(e.dst||'-')+(e.dport?':'+e.dport:'')],['Protocollo',e.proto||'-'],['Zona',e.zone||'-'],['Interfaccia',e.iface||'-'],['Regola',e.rule],['Utente',e.user||'-']];
+ d.className='dr open';
+ d.innerHTML='<div class="hd"><div style="flex:1;min-width:0"><div class="row" style="gap:8px">'+pillOf(e.act)+'<span style="font-weight:500">'+esc(label(e))+'</span></div>'
+ +'<div class="small muted" style="margin-top:4px">'+esc(mean(e))+'</div></div>'
+ +'<button class="btn sm" id="dc" aria-label="Chiudi"><svg class="ic" style="width:14px;height:14px"><path d="M6 6l12 12M18 6L6 18"/></svg></button></div>'
+ +'<div class="bd">'
+ +'<p class="sec">Evidenza</p><dl class="kv">'+kv.map(function(p){return '<dt>'+p[0]+'</dt><dd>'+esc(p[1])+'</dd>'}).join('')+'</dl>'
+ +'<p class="sec" style="margin-top:16px">Riga originale</p><div class="raw">'+raw+'</div>'
+ +'<p class="sec" style="margin-top:16px">Cause probabili</p><div class="steps">'+c.causes.map(function(x){return '<div>· '+esc(fill(x,e))+'</div>'}).join('')+'</div>'
+ +'<p class="sec" style="margin-top:16px">Come risolvere</p><div class="steps">'+c.steps.map(function(x,i){return '<div><b>'+(i+1)+'.</b>'+esc(fill(x,e))+'</div>'}).join('')+'</div>'
+ +'<div class="row" style="margin-top:14px;flex-wrap:wrap">'
+ +(e.src&&HOSTS[e.src]?'<button class="btn sm" data-host="'+esc(e.src)+'">Apri '+esc(HOSTS[e.src].n)+'</button>':'')
+ +(e.rule&&e.rule!=='-'?'<button class="btn sm" data-rule="'+esc(e.rule)+'">Apri la regola</button>':'')
+ +(e.tunnel?'<button class="btn sm" data-tunnel="'+esc(e.tunnel)+'">Apri il tunnel</button>':'')
+ +'<button class="btn sm" data-explore-event="'+e.eid+'">Eventi simili</button>'
+ +(e.src&&e.dst&&e.dport?'<button class="btn sm" data-sim="1" data-sim-src="'+esc(e.src)+'" data-sim-dst="'+esc(e.dst)+'" data-sim-dport="'+esc(e.dport)+'" data-sim-proto="'+esc(e.proto||'tcp')+'" data-sim-iface="'+esc(e.iface||'eth0')+'">Rigioca nel simulatore</button>':'')
+ +'</div><p class="mini" style="margin-top:14px">Testi da catalogo-eventi.yml · voce '+e.eid+'</p></div>';
+}
+
+function render(){
+ var w=document.getElementById('wrap'),n=S.route.n;
+ w.innerHTML=n==='overview'?vOverview():n==='explore'?vExplore():n==='simulate'?vSimulate():n==='live'?vLive():n==='settings'?vSettings():n==='host'?vHost():n==='rule'?vRule():vTunnel();
+ var sc=document.getElementById('scope');if(sc)sc.value=S.scope;
+ drawer();
+}
+function readSim(){
+ ['src','dst','dport','proto','iface'].forEach(function(k){
+  var el=document.getElementById('s-'+k);if(el&&el.value!=null)S.sim[k]=String(el.value).trim();
+ });
+}
+function setFilters(f){S.tokens=f.tokens||[];S.cons=f.cons||[];S.cat=f.cat||[];S.range=null;S.sel=null}
+
+document.getElementById('dk').addEventListener('click',function(){
+ var h=document.documentElement;
+ if(h.hasAttribute('data-dark'))h.removeAttribute('data-dark');else h.setAttribute('data-dark','1');
+});
+document.getElementById('gs').addEventListener('keydown',function(ev){
+ if(ev.key!=='Enter')return;
+ var q=ev.target.value.trim();if(!q)return;
+ var ip=HOSTS[q]?q:hostByName(q);
+ if(ip)return go('host',ip);
+ if(/^\d+\.\d+\.\d+\.\d+$/.test(q))return go('host',q);
+ if(DATA.some(function(e){return e.tunnel===q}))return go('tunnel',q);
+ if(DATA.some(function(e){return e.rule===q}))return go('rule',q);
+ setFilters({tokens:[{k:'text',v:q}]});go('explore');
+});
+
+document.body.addEventListener('click',function(ev){
+ var t=ev.target;
+ var tb=t.closest('[data-tab]');if(tb){setFilters({});S.route={n:tb.dataset.tab};S.sel=null;return render()}
+ var ins=t.closest('[data-ins]');if(ins){var i=insights()[+ins.dataset.ins];
+   if(i.go[0]==='explore'){setFilters(i.go[1]);return go('explore')}
+   return go(i.go[0],i.go[1])}
+ var vw=t.closest('[data-view]');if(vw){setFilters(VIEWS[+vw.dataset.view].f());return go('explore')}
+ var hs=t.closest('[data-host]');if(hs)return go('host',hs.dataset.host);
+ var rl=t.closest('[data-rule]');if(rl)return go('rule',rl.dataset.rule);
+ var tn=t.closest('[data-tunnel]');if(tn)return go('tunnel',tn.dataset.tunnel);
+ var es=t.closest('[data-explore-src]');if(es){setFilters({tokens:[{k:'src',v:es.dataset.exploreSrc}]});return go('explore')}
+ var er=t.closest('[data-explore-rule]');if(er){setFilters({tokens:[{k:'rule',v:er.dataset.exploreRule}]});return go('explore')}
+ var et=t.closest('[data-explore-tunnel]');if(et){setFilters({tokens:[{k:'tunnel',v:et.dataset.exploreTunnel}]});return go('explore')}
+ var ee=t.closest('[data-explore-event]');if(ee){setFilters({tokens:[{k:'event',v:ee.dataset.exploreEvent}]});return go('explore')}
+ if(t.closest('[data-live]'))return go('live');
+ if(t.closest('[data-clear]')){setFilters({});return render()}
+ if(t.closest('[data-lease]')){var st=document.getElementById('hint');if(st)st.textContent='nessun lease per quell\'indirizzo';return}
+ var rm=t.closest('[data-rm]');if(rm){S.tokens.splice(+rm.dataset.rm,1);S.sel=null;return render()}
+ var fx=t.closest('.fx');if(fx){var k=fx.dataset.fk,v=fx.dataset.fv,ix=S[k].indexOf(v);if(ix>-1)S[k].splice(ix,1);else S[k].push(v);S.sel=null;return render()}
+ if(t.closest('#clrr')){S.range=null;return render()}
+ if(t.closest('#pp')){S.live=!S.live;if(S.live)lt=setInterval(tick,1000);else clearInterval(lt);return render()}
+ if(t.closest('#deg')){S.deg=!S.deg;return render()}
+ if(t.closest('#dc')){S.sel=null;return render()}
+ if(t.closest('#perma')){var hh=document.getElementById('hint');if(hh)hh.textContent='link copiato negli appunti';return}
+ var scn=t.closest('[data-scen]');if(scn){var sp=SCEN[+scn.dataset.scen];
+   S.sim={src:sp.src,dst:sp.dst,dport:sp.dport,proto:sp.proto,iface:sp.iface,res:null,trace:false,tracing:false};
+   S.sim.res=simulate(S.sim);return render()}
+ if(t.closest('#simrun')){readSim();S.sim.trace=false;S.sim.res=simulate(S.sim);return render()}
+ if(t.closest('#simtrace')){readSim();S.sim.tracing=true;S.sim.res=null;render();
+   setTimeout(function(){S.sim.tracing=false;S.sim.trace=true;S.sim.res=simulate(S.sim);render()},2200);return}
+ var sim=t.closest('[data-sim]');if(sim){var d=sim.dataset;
+   S.sim={src:d.simSrc||'',dst:d.simDst||'',dport:d.simDport||'',proto:d.simProto||'tcp',iface:d.simIface||'eth0',trace:false,tracing:false};
+   S.sim.res=simulate(S.sim);return go('simulate')}
+ if(t.closest('[data-simev]')){setFilters({tokens:[{k:'src',v:S.sim.src},{k:'port',v:String(S.sim.dport)}]});return go('explore')}
+ var r=t.closest('tr.r');if(r){var idv=+r.dataset.id;S.sel=(S.sel===idv?null:idv);return render()}
+});
+document.body.addEventListener('change',function(ev){
+ if(ev.target.id==='scope'){S.scope=ev.target.value;render()}
+});
+document.body.addEventListener('keydown',function(ev){
+ if(ev.target.id==='q'&&ev.key==='Enter'){
+  var s=ev.target.value.trim();if(!s)return;
+  var m=s.match(/^(src|dst|host|rule|tunnel|action|port|user)\s*=\s*(.+)$/i);
+  S.tokens.push(m?{k:m[1].toLowerCase(),v:m[2].trim()}:{k:'text',v:s});
+  S.sel=null;render();var q=document.getElementById('q');if(q)q.focus();
+ }
+ if(ev.key==='Escape'){S.sel=null;render()}
+});
+var drg=null;
+document.body.addEventListener('mousedown',function(ev){var b=ev.target.closest('.hb');if(!b)return;drg=[+b.dataset.m,+b.dataset.m];ev.preventDefault()});
+document.body.addEventListener('mousemove',function(ev){
+ if(!drg)return;var b=ev.target.closest('.hb');if(!b)return;drg[1]=+b.dataset.m;
+ var a=Math.min(drg[0],drg[1]),z=Math.max(drg[0],drg[1]);
+ var all=document.querySelectorAll('.hb');
+ for(var i=0;i<all.length;i++){var m=+all[i].dataset.m;if(m<a||m>z)all[i].classList.add('off');else all[i].classList.remove('off')}
+});
+window.addEventListener('mouseup',function(){
+ if(!drg)return;var a=Math.min(drg[0],drg[1]),z=Math.max(drg[0],drg[1]);drg=null;
+ S.range=(S.range&&S.range[0]===a&&S.range[1]===z)?null:[a,z];S.sel=null;render();
+});
+
+for(var i=0;i<8;i++)tick();
+lt=setInterval(tick,1000);
+render();
+</script>
+</body>
+</html>
