@@ -1,0 +1,1492 @@
+<!doctype html>
+<html lang="it">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Strumenti NethSecurity</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Carlito:wght@400;700&family=Poppins:wght@400;500&display=swap">
+<style>
+  /* Shell: una barra con il nome, le tab degli strumenti e la lingua; sotto, lo strumento attivo. Palette delle presentazioni NethSecurity. */
+  :root{ --field:#F7F9FB; --paper:#FFFFFF; --ink:#0F172A; --body:#1E293B; --muted:#64748B; --faint:#94A3B8;
+    --rule:#CBD5E1; --hair:#E2E8F0; --teal:#0E7490;
+    --amber:#B45309; --amber-wash:#FFFBEB; --term:#0F172A; --term-ink:#E2E8F0; --term-dim:#94A3B8;
+    --bad:#B91C1C; --bad-wash:#FEF2F2; --good:#047857;
+    --lan-a:#F3F5F7; --lan-b:#F3F5F7; --blue:#2563EB; --alt:#F3F5F7; --nstab:#A5B4FC; --nstab-ink:#1E293B; --nshead:#F3F4F6;
+    --ui: Calibri, Carlito, "Segoe UI", system-ui, Roboto, Helvetica, Arial, sans-serif;
+    --mono: ui-monospace, "SF Mono", "Cascadia Mono", Menlo, Consolas, "Liberation Mono", monospace; --term-step:#74869C; }
+  @media (prefers-color-scheme: dark){ :root:not([data-theme="light"]){ --field:#090F17; --paper:#111827; --ink:#F9FAFB; --body:#F3F4F6; --muted:#9CA3AF; --faint:#6B7280;
+      --rule:#374151; --hair:#1F2937; --teal:#22D3EE;
+      --amber:#F4B740; --amber-wash:#332711; --term:#0D1420; --term-ink:#E2E8F0; --term-dim:#6B7280;
+      --bad:#F87171; --bad-wash:#3A1416; --good:#34D399;
+      --lan-a:#0D1420; --lan-b:#0D1420; --blue:#5B9BF5; --alt:#0D1420; --nstab:#4338CA; --nstab-ink:#E0E7FF; --nshead:#1F2937; color-scheme:dark; } }
+  :root[data-theme="dark"]{ --field:#090F17; --paper:#111827; --ink:#F9FAFB; --body:#F3F4F6; --muted:#9CA3AF; --faint:#6B7280;
+      --rule:#374151; --hair:#1F2937; --teal:#22D3EE;
+      --amber:#F4B740; --amber-wash:#332711; --term:#0D1420; --term-ink:#E2E8F0; --term-dim:#6B7280;
+      --bad:#F87171; --bad-wash:#3A1416; --good:#34D399;
+      --lan-a:#0D1420; --lan-b:#0D1420; --blue:#5B9BF5; --alt:#0D1420; --nstab:#4338CA; --nstab-ink:#E0E7FF; --nshead:#1F2937; color-scheme:dark; }
+  *{box-sizing:border-box}
+  body{margin:0; background:var(--field); color:var(--body); font-family:var(--ui); font-size:16px; line-height:1.5}
+  h1,h2,h3{margin:0; color:var(--ink); font-weight:600; letter-spacing:-.01em; text-wrap:balance}
+  .shell{background:var(--paper); border-bottom:1px solid var(--hair); padding:12px 24px 0; position:sticky; top:env(safe-area-inset-top,0px); z-index:5}
+  .shell .row{display:flex; align-items:center; gap:16px; justify-content:space-between; flex-wrap:wrap}
+  .shell h1{font-size:17px}
+  .shell h1 span{color:var(--teal)}
+  .shell .ver{font-size:12.5px; color:var(--muted); margin-right:auto}
+  .lang{display:flex; border:1px solid var(--rule); border-radius:5px; overflow:hidden}
+  .lang button{font:inherit; font-size:13px; padding:4px 11px; border:0; cursor:pointer; background:var(--paper); color:var(--muted)}
+  .lang button[aria-pressed="true"]{background:var(--teal); color:var(--paper)}
+  .tabs{display:flex; gap:4px; margin-top:10px; overflow-x:auto}
+  .tabs button{font:inherit; font-size:14.5px; padding:8px 16px; border:0; border-bottom:3px solid transparent; background:none; color:var(--muted); cursor:pointer; white-space:nowrap}
+  .tabs button:hover{color:var(--ink)}
+  .tabs button[aria-selected="true"]{color:var(--teal); border-bottom-color:var(--teal); font-weight:600}
+  .tabs button:focus-visible, .lang button:focus-visible{outline:2px solid var(--teal); outline-offset:-2px}
+  .toolsub{padding:12px 24px 0; color:var(--muted); font-size:13.5px; max-width:1500px; margin:0 auto}
+  @media (max-width:520px){ .shell,.toolsub{padding-left:16px; padding-right:16px} }
+  [hidden]{display:none!important}
+#tool-ha h1, #tool-ha h2, #tool-ha h3{margin:0; color:var(--ink); font-weight:600; letter-spacing:-.01em}
+#tool-ha .work{display:grid; grid-template-columns:minmax(0,1.35fr) minmax(0,1fr); gap:0; align-items:start}
+#tool-ha .plan{padding:26px 24px 60px; min-width:0}
+#tool-ha .out{position:sticky; top:0; align-self:start; height:100vh;
+    padding:26px 24px; background:var(--paper); border-left:1px solid var(--hair);
+    display:flex; flex-direction:column; min-width:0;}
+@media (max-width:1000px){
+#tool-ha .work{grid-template-columns:1fr}
+#tool-ha .out{position:static; height:auto; border-left:0; border-top:1px solid var(--hair)}
+}
+#tool-ha section{margin-bottom:30px}
+#tool-ha .shead{display:flex; align-items:baseline; gap:12px; margin-bottom:4px}
+#tool-ha .shead h2{font-size:15.5px}
+#tool-ha .shead .hint{color:var(--faint); font-size:13px}
+#tool-ha .lead{color:var(--muted); font-size:13.5px; margin:0 0 12px}
+#tool-ha .grid{display:grid; gap:10px}
+#tool-ha .grid.meta{grid-template-columns:repeat(3,minmax(0,1fr))}
+@media (max-width:760px){
+#tool-ha .grid.meta{grid-template-columns:1fr}
+}
+#tool-ha label{display:block}
+#tool-ha .cap{display:block; font-size:12.5px; color:var(--muted); margin-bottom:3px}
+#tool-ha input[type=text], #tool-ha input[type=number]{width:100%; font:inherit; color:var(--body);
+    background:var(--paper); border:1px solid var(--rule); border-radius:5px;
+    padding:7px 9px;}
+#tool-ha input.mono{font-family:var(--mono); font-size:13.5px}
+#tool-ha input:focus, #tool-ha button:focus-visible{outline:2px solid var(--teal); outline-offset:1px; border-color:var(--teal);}
+#tool-ha input.err{border-color:var(--bad); background:var(--bad-wash)}
+#tool-ha .iface{background:var(--paper); border:1px solid var(--hair); border-radius:7px; padding:14px 15px}
+#tool-ha .iface.lead-iface{border-color:var(--teal); border-left-width:4px}
+#tool-ha .ifgrid{display:grid; gap:10px; grid-template-columns:repeat(4,minmax(0,1fr))}
+@media (max-width:760px){
+#tool-ha .ifgrid{grid-template-columns:repeat(2,minmax(0,1fr))}
+}
+#tool-ha .ifgrid .wide{grid-column:span 2}
+#tool-ha .rowtop{display:flex; justify-content:space-between; align-items:baseline; margin-bottom:9px; gap:10px}
+#tool-ha .rowtop .n{font-size:13.5px; color:var(--muted)}
+#tool-ha .stack{display:flex; flex-direction:column; gap:12px}
+#tool-ha .problems{margin:9px 0 0; padding:0; list-style:none}
+#tool-ha .problems li{font-size:13px; color:var(--bad); padding:4px 8px; border-radius:4px;
+    background:var(--bad-wash); margin-top:4px;}
+#tool-ha .problems li::before{content:"!"; font-family:var(--mono); font-weight:700; margin-right:7px}
+#tool-ha button.act{font:inherit; font-size:13.5px; cursor:pointer; border-radius:5px;
+    border:1px solid var(--rule); background:var(--paper); color:var(--body);
+    padding:6px 12px;}
+#tool-ha button.act:hover{border-color:var(--teal); color:var(--teal)}
+#tool-ha button.link{font:inherit; font-size:13px; background:none; border:0; cursor:pointer;
+    color:var(--muted); padding:2px 4px; text-decoration:underline;}
+#tool-ha button.link:hover{color:var(--bad)}
+#tool-ha .bar{display:flex; gap:9px; flex-wrap:wrap; margin-top:12px}
+#tool-ha .outhead{display:flex; align-items:baseline; justify-content:space-between; gap:12px; margin-bottom:10px}
+#tool-ha .outhead h2{font-size:15.5px}
+#tool-ha .outhead .opts{display:flex; align-items:center; gap:12px}
+#tool-ha .toggle{display:flex; align-items:center; gap:6px; font-size:13px; color:var(--muted); cursor:pointer}
+#tool-ha .toggle input{margin:0; cursor:pointer}
+#tool-ha .term{flex:1 1 auto; overflow:auto; background:var(--term); border-radius:7px;
+    padding:16px 18px; font-family:var(--mono); font-size:13px; line-height:1.75;
+    color:var(--term-ink); min-height:220px;}
+#tool-ha .term .step{color:var(--term-step); margin:16px 0 6px; font-weight:600}
+#tool-ha .term .step:first-child{margin-top:0}
+#tool-ha .term .note{color:var(--term-dim)}
+#tool-ha .term .cmdbox{position:relative; background:rgba(255,255,255,.045);
+    border:1px solid rgba(255,255,255,.09); border-radius:5px;
+    padding:9px 72px 9px 12px; margin:6px 0;
+    white-space:pre-wrap; word-break:break-word;}
+#tool-ha .term .cmdbox .cp{position:absolute; top:6px; right:6px; cursor:pointer;
+    font-family:var(--ui); font-size:11.5px; line-height:1.4;
+    background:transparent; border:1px solid rgba(255,255,255,.2);
+    border-radius:4px; color:#8193AC; padding:2px 9px;}
+#tool-ha .term .cmdbox .cp:hover{color:#E2E8F0; border-color:rgba(255,255,255,.45)}
+#tool-ha .term .cmdbox .cp.done{color:#6EE7B7; border-color:#6EE7B7}
+#tool-ha .term .ph{color:#F4B740}
+#tool-ha .term .skip{color:#F4B740; margin-bottom:12px; white-space:pre-wrap}
+#tool-ha .term .blocked{color:#FCA5A5}
+#tool-ha .term .blocked b{color:#FECACA; font-weight:600}
+#tool-ha .after{margin-top:14px; font-size:13px; color:var(--muted)}
+#tool-ha .after p{margin:6px 0}
+#tool-netmap h1, #tool-netmap h2, #tool-netmap h3{margin:0; color:var(--ink); font-weight:600; letter-spacing:-.01em; text-wrap:balance}
+#tool-netmap .wrap{padding:22px 24px 60px; display:flex; flex-direction:column; gap:22px; max-width:1500px; margin:0 auto}
+@media (max-width:520px){
+#tool-netmap .wrap{padding-left:16px; padding-right:16px}
+}
+#tool-netmap .how{display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:12px}
+#tool-netmap .how p{margin:0; font-size:13.5px; color:var(--body); background:var(--paper); border:1px solid var(--hair); border-radius:7px; padding:10px 12px}
+#tool-netmap .how b{color:var(--teal); font-family:var(--mono); margin-right:6px}
+@media (max-width:900px){
+#tool-netmap .how{grid-template-columns:1fr}
+}
+#tool-netmap .pair{display:grid; grid-template-columns:minmax(0,1fr) minmax(0,1.15fr); gap:22px; align-items:start}
+#tool-netmap .pair > *{min-width:0}
+#tool-netmap .schemawrap{position:sticky; top:env(safe-area-inset-top,0px)}
+@media (max-width:1000px){
+#tool-netmap .pair{grid-template-columns:1fr}
+#tool-netmap .schemawrap{position:static}
+}
+#tool-netmap .configs{display:grid; grid-template-columns:1fr; gap:18px}
+#tool-netmap .configs > *{min-width:0}
+#tool-netmap .sectitle{display:flex; align-items:baseline; justify-content:space-between; gap:12px; flex-wrap:wrap; margin-bottom:10px}
+#tool-netmap .sectitle h2{font-size:15.5px}
+#tool-netmap .lead{color:var(--muted); font-size:13.5px; margin:0 0 12px; max-width:62ch}
+#tool-netmap .grid{display:grid; gap:10px; grid-template-columns:repeat(2,minmax(0,1fr))}
+@media (max-width:560px){
+#tool-netmap .grid{grid-template-columns:1fr}
+}
+#tool-netmap .cap{display:block; font-size:12.5px; color:var(--muted); margin-bottom:3px}
+#tool-netmap input[type=text]{width:100%; font:inherit; color:var(--body); background:var(--paper); border:1px solid var(--rule); border-radius:5px; padding:7px 9px}
+#tool-netmap input.mono{font-family:var(--mono); font-size:13.5px}
+#tool-netmap input:focus, #tool-netmap button:focus-visible{outline:2px solid var(--teal); outline-offset:1px; border-color:var(--teal)}
+#tool-netmap input.err{border-color:var(--bad); background:var(--bad-wash)}
+#tool-netmap .site{background:var(--paper); border:1px solid var(--hair); border-radius:7px; padding:14px 15px}
+#tool-netmap .site.a{border-left:4px solid var(--teal)}
+#tool-netmap .site.b{border-left:4px solid var(--blue)}
+#tool-netmap .site h3{font-size:14px; margin-bottom:10px}
+#tool-netmap .site .full{grid-column:1 / -1}
+#tool-netmap .problems{margin:9px 0 0; padding:0; list-style:none}
+#tool-netmap .problems li{font-size:13px; color:var(--bad); padding:4px 8px; border-radius:4px; background:var(--bad-wash); margin-top:4px}
+#tool-netmap .problems li::before{content:"!"; font-family:var(--mono); font-weight:700; margin-right:7px}
+#tool-netmap .warn{font-size:13px; color:var(--amber); padding:7px 10px; border-radius:5px; background:var(--amber-wash); margin-top:12px}
+#tool-netmap button.act{font:inherit; font-size:13.5px; cursor:pointer; border-radius:5px; border:1px solid var(--rule); background:var(--paper); color:var(--body); padding:6px 12px}
+#tool-netmap button.act:hover{border-color:var(--teal); color:var(--teal)}
+#tool-netmap .bar{display:flex; gap:9px; flex-wrap:wrap; margin-top:12px}
+#tool-netmap .schema{overflow-x:auto; background:var(--field); border:1px solid var(--hair); border-radius:7px; padding:10px; margin-bottom:22px}
+#tool-netmap .schema svg{display:block; width:100%; min-width:560px; height:auto}
+#tool-netmap .s-box{stroke:var(--rule); stroke-width:1}
+#tool-netmap .s-lan-a{fill:var(--lan-a); stroke:var(--teal); stroke-width:1.5}
+#tool-netmap .s-lan-b{fill:var(--lan-b); stroke:var(--blue); stroke-width:1.5}
+#tool-netmap .s-fw{fill:var(--paper); stroke:var(--teal); stroke-width:1.5}
+#tool-netmap .s-line{stroke:var(--muted); stroke-width:1.5; fill:none}
+#tool-netmap .s-tun{stroke:var(--amber); stroke-width:2.5; stroke-dasharray:6 5; fill:none}
+#tool-netmap .s-t{fill:var(--ink); font-family:var(--ui); font-size:13px; font-weight:600}
+#tool-netmap .s-s{fill:var(--muted); font-family:var(--ui); font-size:11px}
+#tool-netmap .s-m{fill:var(--body); font-family:var(--mono); font-size:11.5px}
+#tool-netmap .s-ch{fill:var(--teal); font-family:var(--mono); font-size:11.5px; font-weight:700}
+#tool-netmap .s-pk{fill:var(--paper); stroke:var(--hair)}
+#tool-netmap .s-tag{fill:var(--amber); font-family:var(--ui); font-size:10.5px; font-weight:600}
+#tool-netmap .fw{border:1px solid var(--hair); border-radius:7px; margin-bottom:18px; overflow:hidden; background:var(--paper)}
+#tool-netmap .fw > header{display:flex; align-items:baseline; gap:10px; padding:10px 14px; background:var(--alt); border-left:4px solid var(--teal); border-bottom:1px solid var(--hair); flex-wrap:wrap}
+#tool-netmap .fw.b > header{border-left-color:var(--blue)}
+#tool-netmap .fw > header h3{font-size:15px}
+#tool-netmap .fw .body{padding:12px 14px 14px; display:flex; flex-direction:column; gap:14px}
+#tool-netmap .stepname{font-size:12px; font-weight:600; letter-spacing:.06em; text-transform:uppercase; color:var(--muted); margin-bottom:5px}
+#tool-netmap .where{font-size:12.5px; color:var(--faint); margin-bottom:6px}
+#tool-netmap table.fields{width:100%; border-collapse:collapse; font-size:13.5px; background:var(--paper); border:1px solid var(--hair); border-radius:6px}
+#tool-netmap table.fields td{padding:6px 8px; border-top:1px solid var(--hair); vertical-align:middle}
+#tool-netmap table.fields tr:first-child td{border-top:0}
+#tool-netmap table.fields td.k{color:var(--muted); width:42%}
+#tool-netmap table.fields td.v{font-family:var(--mono); color:var(--ink); font-variant-numeric:tabular-nums; word-break:break-all}
+#tool-netmap .nsui{font-family:Poppins, var(--ui)}
+#tool-netmap .nsui .tab{display:inline-block; background:var(--nstab); color:var(--nstab-ink); font-size:13.5px; padding:4px 11px; border-radius:7px 7px 0 0}
+#tool-netmap .nsui .tbl{border:1px solid var(--hair); border-radius:0 8px 8px 8px; overflow-x:auto; background:var(--paper)}
+#tool-netmap .nsui table{width:100%; border-collapse:collapse; font-size:13.5px; min-width:560px}
+#tool-netmap .nsui th{text-align:left; font-weight:500; color:var(--ink); background:var(--nshead); padding:10px 14px; border-bottom:1px solid var(--hair); white-space:nowrap}
+#tool-netmap .nsui td{padding:12px 14px; color:var(--body); white-space:nowrap; font-variant-numeric:tabular-nums}
+#tool-netmap .nsui td .cp{margin-left:6px}
+#tool-netmap .cp{font:inherit; font-size:11.5px; cursor:pointer; border:1px solid var(--rule); background:transparent; color:var(--muted); border-radius:4px; padding:1px 8px; margin-left:8px}
+#tool-netmap .cp:hover{color:var(--teal); border-color:var(--teal)}
+#tool-netmap .cp.done{color:var(--good); border-color:var(--good)}
+#tool-netmap .check{background:var(--paper); border:1px solid var(--hair); border-radius:7px; padding:12px 14px; margin-top:18px}
+#tool-netmap .check h3{font-size:14px; margin-bottom:8px}
+#tool-netmap .check p{margin:6px 0; font-size:13.5px}
+#tool-netmap .check code{font-family:var(--mono); font-size:12.5px; background:var(--field); padding:1px 5px; border-radius:3px}
+#tool-netmap .notes{font-size:13px; color:var(--muted)}
+#tool-netmap .notes p{margin:6px 0}
+#tool-netmap .blocked{color:var(--bad); background:var(--bad-wash); border-radius:6px; padding:12px 14px; font-size:13.5px}
+@media (prefers-reduced-motion:no-preference){
+#tool-netmap .cp{transition:color .15s, border-color .15s}
+}
+  #tool-ha .out{top:calc(env(safe-area-inset-top,0px) + var(--shell-h,0px)); height:calc(100vh - var(--shell-h,0px))}
+  #tool-netmap .schemawrap{top:calc(env(safe-area-inset-top,0px) + var(--shell-h,0px) + 8px)}
+</style>
+</head>
+<body>
+<header class="shell" id="shell">
+  <div class="row">
+    <h1>Strumenti <span>NethSecurity</span></h1>
+    <span class="ver" id="nsver"></span>
+    <div class="lang" role="group" aria-label="Lingua / Language">
+      <button type="button" data-lang="it" aria-pressed="true">IT</button>
+      <button type="button" data-lang="en" aria-pressed="false">EN</button>
+    </div>
+  </div>
+  <nav class="tabs" role="tablist" aria-label="Strumenti">
+    <button type="button" role="tab" id="tab-netmap" aria-controls="tool-netmap" data-tool="netmap" data-it="NETMAP" data-en="NETMAP">NETMAP</button>
+    <button type="button" role="tab" id="tab-ha" aria-controls="tool-ha" data-tool="ha" data-it="Alta affidabilità" data-en="High availability">Alta affidabilità</button>
+  </nav>
+</header>
+<p class="toolsub" id="toolsub"></p>
+
+<section id="tool-ha" role="tabpanel" aria-labelledby="tab-ha" hidden>
+
+
+
+
+<div class="work">
+
+  <!-- ============== COLONNA SINISTRA: IL PIANO ============== -->
+  <main class="plan">
+
+    <section>
+      <div class="shead"><h2 data-i18n="projH">Progetto</h2></div>
+      <div class="grid meta">
+        <label><span class="cap" data-i18n="fCustomer">Cliente</span><input type="text" id="m_customer"></label>
+        <label><span class="cap" data-i18n="fSite">Sede</span><input type="text" id="m_site"></label>
+        <label><span class="cap" data-i18n="fAuthor">Compilato da</span><input type="text" id="m_author"></label>
+        <label><span class="cap" data-i18n="fDate">Data</span><input type="text" id="m_date"></label>
+        <label><span class="cap" data-i18n="fVersion">Versione NethSecurity</span><input type="text" id="m_version"></label>
+        <label><span class="cap" data-i18n="fNotes">Note</span><input type="text" id="m_notes"></label>
+      </div>
+    </section>
+
+    <section>
+      <div class="shead">
+        <h2 data-i18n="haH">Interfaccia HA</h2>
+        <span class="hint" data-i18n="haHint">una sola per cluster, è dove viaggia il VRRP</span>
+      </div>
+      <p class="lead" data-i18n="haLead">Tre indirizzi nella stessa subnet: i due nodi e il VIP che si sposta su quello attivo.</p>
+      <div class="iface lead-iface" id="ha_block">
+        <div class="ifgrid">
+          <label><span class="cap" data-i18n="fIface">Nome interfaccia</span><input type="text" class="mono" id="ha_name" value="lan" spellcheck="false"></label>
+          <label><span class="cap" data-i18n="fDevice">Device</span><input type="text" class="mono" id="ha_dev" placeholder="eth0" spellcheck="false"></label>
+          <label><span class="cap" data-i18n="fPri">IP nodo primario</span><input type="text" class="mono" id="ha_pri" placeholder="192.168.100.238" spellcheck="false" inputmode="decimal"></label>
+          <label><span class="cap" data-i18n="fSec">IP nodo secondario</span><input type="text" class="mono" id="ha_sec" placeholder="192.168.100.239" spellcheck="false" inputmode="decimal"></label>
+          <label class="wide"><span class="cap" data-i18n="fVip">VIP — gateway e DNS dei client</span><input type="text" class="mono" id="ha_vip" placeholder="192.168.100.240" spellcheck="false" inputmode="decimal"></label>
+          <label><span class="cap" data-i18n="fPrefix">Prefisso</span><input type="number" class="mono" id="ha_pfx" value="24" min="8" max="30"></label>
+        </div>
+        <ul class="problems" id="ha_problems"></ul>
+      </div>
+    </section>
+
+    <section>
+      <div class="shead">
+        <h2 data-i18n="lanH">LAN aggiuntive</h2>
+        <span class="hint" data-i18n="lanHint">opzionale</span>
+      </div>
+      <p class="lead" data-i18n="lanLead">DMZ, guest, altre reti del cluster. Stessa logica a tre indirizzi.</p>
+      <div class="stack" id="lan_list"></div>
+      <div class="bar"><button type="button" class="act" id="add_lan" data-i18n="addLan">Aggiungi una LAN</button></div>
+    </section>
+
+    <section>
+      <div class="shead">
+        <h2 data-i18n="vipH">VIP aggiuntivi</h2>
+        <span class="hint" data-i18n="vipHint">opzionale</span>
+      </div>
+      <p class="lead" data-i18n="vipLead">Un indirizzo virtuale in più su un'interfaccia che fa già parte del cluster.</p>
+      <div class="stack" id="vip_list"></div>
+      <div class="bar"><button type="button" class="act" id="add_vip" data-i18n="addVip">Aggiungi un VIP</button></div>
+    </section>
+
+    <div class="bar noprint">
+      <button type="button" class="act" id="save" data-i18n="save">Salva il piano</button>
+      <button type="button" class="act" id="loadbtn" data-i18n="load">Apri un piano</button>
+      <button type="button" class="act" id="pdf" data-i18n="pdf">Scarica il PDF del piano</button>
+      <button type="button" class="act" id="example" data-i18n="example">Carica un esempio</button>
+      <input type="file" id="loadfile" accept=".json,application/json" hidden>
+    </div>
+  </main>
+
+  <!-- ============== COLONNA DESTRA: I COMANDI ============== -->
+  <aside class="out">
+    <div class="outhead">
+      <h2 data-i18n="cmdH">Comandi</h2>
+      <span class="noprint opts">
+        <label class="toggle"><input type="checkbox" id="nonint"><span data-i18n="nonInt">comandi non interattivi</span></label>
+        <button type="button" class="act" id="copy" data-i18n="copy">Copia tutto</button>
+      </span>
+    </div>
+    <div class="term" id="terminal"></div>
+    <div class="after" id="after"></div>
+  </aside>
+
+</div>
+
+
+</section>
+
+<section id="tool-netmap" role="tabpanel" aria-labelledby="tab-netmap" hidden>
+<div class="wrap">
+  <div>
+    <div class="sectitle"><h2 data-i18n="howH">Come funziona</h2></div>
+    <div class="how">
+      <p><b>1</b><span data-i18n="how1"></span></p>
+      <p><b>2</b><span data-i18n="how2"></span></p>
+      <p><b>3</b><span data-i18n="how3"></span></p>
+    </div>
+  </div>
+
+  <div>
+      <div class="sectitle"><h2 data-i18n="netH">Le due sedi</h2></div>
+      <p class="lead" style="max-width:none" data-i18n="netLead"></p>
+  </div>
+
+  <div class="pair">
+    <div>
+      <div style="display:flex; flex-direction:column; gap:12px">
+        <div class="site a">
+          <h3 data-i18n="siteA">Sede A</h3>
+          <div class="grid">
+            <label class="full"><span class="cap" data-i18n="fName"></span><input type="text" class="mono" id="a_name" spellcheck="false"></label>
+            <label><span class="cap" data-i18n="fReal"></span><input type="text" class="mono" id="a_real" spellcheck="false" placeholder="192.168.1.0/24"></label>
+            <label><span class="cap" data-i18n="fMap"></span><input type="text" class="mono" id="a_map" spellcheck="false" placeholder="10.1.1.0/24"></label>
+          </div>
+          <ul class="problems" id="a_problems"></ul>
+        </div>
+        <div class="site b">
+          <h3 data-i18n="siteB">Sede B</h3>
+          <div class="grid">
+            <label class="full"><span class="cap" data-i18n="fName"></span><input type="text" class="mono" id="b_name" spellcheck="false"></label>
+            <label><span class="cap" data-i18n="fReal"></span><input type="text" class="mono" id="b_real" spellcheck="false" placeholder="192.168.1.0/24"></label>
+            <label><span class="cap" data-i18n="fMap"></span><input type="text" class="mono" id="b_map" spellcheck="false" placeholder="10.2.2.0/24"></label>
+          </div>
+          <ul class="problems" id="b_problems"></ul>
+        </div>
+      </div>
+      <ul class="problems" id="g_problems"></ul>
+      <div id="g_warn"></div>
+      <div class="bar">
+        <button type="button" class="act" id="nm_suggest" data-i18n="suggest"></button>
+        <button type="button" class="act" id="nm_example" data-i18n="example"></button>
+        <button type="button" class="act" id="nm_clear" data-i18n="clear"></button>
+      </div>
+    </div>
+    <div class="schemawrap" aria-live="polite">
+      <div class="sectitle"><h2 data-i18n="schemaH"></h2></div>
+      <div id="schema"></div>
+    </div>
+  </div>
+
+  <div aria-live="polite">
+    <div class="sectitle"><h2 data-i18n="outH">Configurazione</h2></div>
+    <div id="config"></div>
+  </div>
+</div>
+
+
+</section>
+
+<script>
+"use strict";
+/* Registro degli strumenti: ogni strumento è una <section id="tool-…"> con il suo script isolato,
+   che si registra qui con un id e una funzione setLang. Per aggiungerne uno: nuova voce in TOOLS,
+   nuova tab, nuova section, nuovo script che chiama NSTools.register. */
+const NSTools = (() => {
+  /* Versione di NethSecurity su cui sono stati verificati tutti gli strumenti (comandi e campi della UI).
+     Unica fonte: aggiornarla qui. */
+  const VERSION = "8.8.0";
+  const VER_LABEL = { it: "Verificato su NethSecurity " + VERSION, en: "Checked against NethSecurity " + VERSION };
+  const SUBS = { "netmap": { it: 'Due sedi con la stessa rete collegate in VPN: inserisci le reti, ottieni le configurazioni.', en: 'Two sites with the same network joined by VPN: enter the networks, get the configurations.' }, "ha": { it: 'Pianifica gli indirizzi del cluster, ottieni i comandi ns-ha-config.', en: 'Plan the cluster addresses, get the ns-ha-config commands.' } };
+  const tools = {};
+  let lang = "it", current = null;
+  const store = (k, v) => { try{ if (v === undefined) return localStorage.getItem(k); localStorage.setItem(k, v); }catch(_){ return null; } };
+  function measure(){ document.documentElement.style.setProperty("--shell-h", document.getElementById("shell").offsetHeight + "px"); }
+  function show(id){
+    if (!SUBS[id]) id = "netmap";
+    current = id;
+    document.querySelectorAll(".tabs button").forEach(b => b.setAttribute("aria-selected", String(b.dataset.tool === id)));
+    document.querySelectorAll("section[role=tabpanel]").forEach(s => { s.hidden = s.id !== "tool-" + id; });
+    document.getElementById("toolsub").textContent = SUBS[id][lang];
+    store("ns-tools-tab", id);
+    if (location.hash !== "#" + id) history.replaceState(null, "", "#" + id);
+    measure();
+  }
+  function setLang(l){
+    lang = l; document.documentElement.lang = l;
+    document.querySelectorAll(".lang button").forEach(b => b.setAttribute("aria-pressed", String(b.dataset.lang === l)));
+    document.querySelectorAll(".tabs button").forEach(b => { b.textContent = b.dataset[l]; });
+    for (const k in tools) tools[k].setLang(l);
+    if (current) document.getElementById("toolsub").textContent = SUBS[current][l];
+    document.getElementById("nsver").textContent = VER_LABEL[l];
+    store("ns-tools-lang", l);
+  }
+  document.querySelectorAll(".tabs button").forEach(b => b.addEventListener("click", () => show(b.dataset.tool)));
+  document.querySelectorAll(".lang button").forEach(b => b.addEventListener("click", () => setLang(b.dataset.lang)));
+  window.addEventListener("hashchange", () => show(location.hash.slice(1)));
+  window.addEventListener("resize", measure);
+  return {
+    version: VERSION,
+    register(t){ tools[t.id] = t; },
+    /* Offre un file all'utente. Nella pagina pubblicata su claude.ai passa dalla capability
+       "downloads" (conferma dell'utente); altrove, o se non disponibile, scarica direttamente.
+       Restituisce "saved" oppure "declined". */
+    async saveFile(filename, data, mime){
+      let dl = null;
+      try{ dl = window.claude ? await window.claude.use("downloads") : null; }catch(_){ dl = null; }
+      if (dl){
+        try{ await dl.save({ filename, data }); return "saved"; }
+        catch(err){ if (err && (err.code === "declined" || err.code === "rate_limited")) return "declined"; }
+      }
+      const blob = data instanceof Blob ? data : new Blob([data], { type: mime || "application/octet-stream" });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url; a.download = filename; a.style.display = "none";
+      document.body.appendChild(a); a.click(); a.remove();
+      setTimeout(() => URL.revokeObjectURL(url), 5000);
+      return "saved";
+    },
+    start(){
+      const l = store("ns-tools-lang"); setLang(l === "en" ? "en" : "it");
+      const h = location.hash.slice(1);
+      show(SUBS[h] ? h : (store("ns-tools-tab") || "netmap"));
+    }
+  };
+})();
+</script>
+<script>
+(function(){
+const ROOT = document.getElementById("tool-ha");
+
+
+/* ---------------------------------------------------------------- lingue */
+const T = {
+  it:{
+    projH:"Progetto",
+    fCustomer:"Cliente", fSite:"Sede", fAuthor:"Compilato da", fDate:"Data",
+    fVersion:"Versione NethSecurity", fNotes:"Note",
+    haH:"Interfaccia HA", haHint:"una sola per cluster, è dove viaggia il VRRP",
+    haLead:"Tre indirizzi nella stessa subnet: i due nodi e il VIP che si sposta su quello attivo.",
+    fIface:"Nome interfaccia", fDevice:"Device", fPrefix:"Prefisso",
+    fPri:"IP nodo primario", fSec:"IP nodo secondario", fVip:"VIP — gateway e DNS dei client",
+    lanH:"LAN aggiuntive", lanHint:"opzionale",
+    lanLead:"DMZ, guest, altre reti del cluster. Stessa logica a tre indirizzi.",
+    addLan:"Aggiungi una LAN",
+    vipH:"VIP aggiuntivi", vipHint:"opzionale",
+    vipLead:"Un indirizzo virtuale in più su un'interfaccia già nel cluster. Sulle WAN non servono: gli alias si replicano da soli.",
+    addVip:"Aggiungi un VIP",
+    save:"Salva il piano", load:"Apri un piano", saved:"Piano salvato", example:"Carica un esempio",
+    pdf:"Scarica il PDF del piano", pdfWait:"Preparo il PDF…", pdfDone:"PDF pronto",
+    pdfBlocked:"Correggi prima gli errori", pdfFail:"PDF non disponibile: serve la connessione a internet",
+    pdfTitle:"Alta affidabilità · Piano indirizzi", pdfFile:"piano-ha",
+    pdfProj:"Progetto", pdfCluster:"Interfacce del cluster", pdfVips:"VIP aggiuntivi", pdfNone:"Nessuno",
+    pdfRole:"Ruolo", pdfNet:"Rete", pdfIface:"Interfaccia", roleHa:"HA", roleLan:"LAN",
+    pdfGen:"Generato il {d} con Strumenti NethSecurity", pdfPage:"Pagina {n} di {t}",
+    pdfVer:"Verificato su NethSecurity {v}",
+    cmdH:"Comandi", copy:"Copia tutto", copied:"Copiato", copyOne:"copia",
+    remove:"rimuovi", lanN:"LAN", vipN:"VIP",
+    fOnIface:"Interfaccia del cluster", fVipOnly:"Indirizzo virtuale",
+    /* terminale */
+    tEmpty:"Compila l'interfaccia HA: i comandi compaiono qui.",
+    tBlocked:"Comandi non generati.", tBlockedWhy:"Risolvi prima questi punti:",
+    s1:"Verifica i requisiti, dal nodo primario",
+    s2:"Inizializza il cluster, sempre dal primario",
+    s3:"Aggiungi le altre LAN del cluster",
+    s4:"Aggiungi i VIP extra",
+    sSync:"Allinea subito il secondario",
+    sCheck:"Controlla il risultato",
+    nPwd:"sostituisci il segnaposto con la password di root del secondario",
+    nPwdAsk:"la password di root del secondario viene chiesta a schermo e non viene mostrata",
+    nonInt:"comandi non interattivi",
+    nPre:"prima: IP statici configurati su entrambi i nodi, cavi collegati su tutte le interfacce del cluster",
+    nWait:"Last Sync Status deve riportare Successful",
+    aAfter:"Dopo l'inizializzazione",
+    aWait:"Aspetta almeno 10 minuti prima di provare un failover: la configurazione si sincronizza a quell'intervallo.",
+    aWan:"Le WAN si configurano solo sul primario, dalla web interface, e vengono replicate da sole.",
+    aClients:"I client devono puntare al VIP come gateway e DNS, mai all'indirizzo di un singolo nodo.",
+    /* errori */
+    eIpBad:"non è un indirizzo IPv4 valido",
+    ePfx:"il prefisso deve essere fra 8 e 30",
+    eNotSame:"non è nella stessa rete del nodo primario",
+    eSame:"i tre indirizzi devono essere diversi fra loro",
+    eEdge:"non può coincidere con l'indirizzo di rete o con il broadcast",
+    eMissing:"campo obbligatorio",
+    eName:"nome già usato in un altro blocco",
+    eDev:"device già usato in un altro blocco",
+    eOverlap:"la rete si sovrappone a",
+    eVipIface:"indica l'interfaccia su cui aggiungere il VIP",
+    eVipKnown:"non è un'interfaccia del cluster: il comando verrà rifiutato. Per IP aggiuntivi su una WAN usa gli alias sulla WAN del primario, si replicano da soli",
+    eVipBroken:"il blocco che definisce questa interfaccia contiene un errore: correggilo prima",
+    nVipWarn:"ATTENZIONE, VIP con segnalazioni (comandi generati comunque, verificali):",
+    lblPri:"IP primario", lblSec:"IP secondario", lblVip:"VIP",
+    lblName:"nome interfaccia", lblDev:"device"
+  },
+  en:{
+    projH:"Project",
+    fCustomer:"Customer", fSite:"Site", fAuthor:"Prepared by", fDate:"Date",
+    fVersion:"NethSecurity version", fNotes:"Notes",
+    haH:"HA interface", haHint:"one per cluster, this is where VRRP runs",
+    haLead:"Three addresses in the same subnet: both nodes and the VIP that follows the active one.",
+    fIface:"Interface name", fDevice:"Device", fPrefix:"Prefix",
+    fPri:"Primary node IP", fSec:"Secondary node IP", fVip:"VIP — gateway and DNS for clients",
+    lanH:"Additional LANs", lanHint:"optional",
+    lanLead:"DMZ, guest, other cluster networks. Same three-address pattern.",
+    addLan:"Add a LAN",
+    vipH:"Additional VIPs", vipHint:"optional",
+    vipLead:"One more virtual address on an interface already in the cluster. Not needed on WANs: aliases are replicated automatically.",
+    addVip:"Add a VIP",
+    save:"Save plan", load:"Open plan", saved:"Plan saved", example:"Load an example",
+    pdf:"Download plan PDF", pdfWait:"Preparing the PDF…", pdfDone:"PDF ready",
+    pdfBlocked:"Fix the errors first", pdfFail:"PDF unavailable: an internet connection is needed",
+    pdfTitle:"High availability · Address plan", pdfFile:"ha-plan",
+    pdfProj:"Project", pdfCluster:"Cluster interfaces", pdfVips:"Additional VIPs", pdfNone:"None",
+    pdfRole:"Role", pdfNet:"Network", pdfIface:"Interface", roleHa:"HA", roleLan:"LAN",
+    pdfGen:"Generated on {d} with NethSecurity Tools", pdfPage:"Page {n} of {t}",
+    pdfVer:"Checked against NethSecurity {v}",
+    cmdH:"Commands", copy:"Copy all", copied:"Copied", copyOne:"copy",
+    remove:"remove", lanN:"LAN", vipN:"VIP",
+    fOnIface:"Cluster interface", fVipOnly:"Virtual address",
+    tEmpty:"Fill in the HA interface: the commands appear here.",
+    tBlocked:"No commands generated.", tBlockedWhy:"Fix these first:",
+    s1:"Check the requirements, from the primary node",
+    s2:"Initialise the cluster, again from the primary",
+    s3:"Add the other cluster LANs",
+    s4:"Add the extra VIPs",
+    sSync:"Bring the secondary into line straight away",
+    sCheck:"Check the result",
+    nPwd:"replace the placeholder with the root password of the secondary node",
+    nPwdAsk:"the root password of the secondary node is prompted and not echoed",
+    nonInt:"non-interactive commands",
+    nPre:"first: static IPs set on both nodes, cables connected on every cluster interface",
+    nWait:"Last Sync Status must report Successful",
+    aAfter:"After initialisation",
+    aWait:"Wait at least 10 minutes before testing a failover: the configuration syncs at that interval.",
+    aWan:"WAN interfaces are configured on the primary only, from the web interface, and are replicated automatically.",
+    aClients:"Clients must point to the VIP as gateway and DNS, never to a single node's address.",
+    eIpBad:"is not a valid IPv4 address",
+    ePfx:"the prefix must be between 8 and 30",
+    eNotSame:"is not in the same network as the primary node",
+    eSame:"the three addresses must differ from each other",
+    eEdge:"cannot be the network or the broadcast address",
+    eMissing:"required",
+    eName:"name already used in another block",
+    eDev:"device already used in another block",
+    eOverlap:"the network overlaps with",
+    eVipIface:"name the interface the VIP belongs to",
+    eVipKnown:"not a cluster interface: the command will be refused. For extra addresses on a WAN use aliases on the primary node WAN, they are replicated automatically",
+    eVipBroken:"the block defining this interface has an error: fix it first",
+    nVipWarn:"WARNING, VIPs with findings (commands generated anyway, check them):",
+    lblPri:"primary IP", lblSec:"secondary IP", lblVip:"VIP",
+    lblName:"interface name", lblDev:"device"
+  }
+};
+let L = "it";
+const t = (k, v) => { let s = T[L][k]; if (v) for (const x in v) s = s.split("{" + x + "}").join(v[x]); return s; };
+
+/* ---------------------------------------------------------------- IPv4 */
+function ipToLong(s){
+  if (typeof s !== "string") return null;
+  const p = s.trim().split(".");
+  if (p.length !== 4) return null;
+  let n = 0;
+  for (const o of p){
+    if (!/^\d{1,3}$/.test(o)) return null;
+    const v = Number(o);
+    if (v > 255) return null;
+    n = n * 256 + v;
+  }
+  return n;
+}
+const longToIp = (n) => [n>>>24, (n>>>16)&255, (n>>>8)&255, n&255].join(".");
+const blockSize = (pfx) => Math.pow(2, 32 - pfx);
+const netOf = (n, pfx) => Math.floor(n / blockSize(pfx)) * blockSize(pfx);
+
+/* ---------------------------------------------------------------- stato */
+let lans = [];   // {id,name,dev,pfx,pri,sec,vip}
+let vips = [];   // {id,iface,vip,pfx}
+let seq = 0;
+const uid = () => "r" + (++seq);
+
+const val = (id) => (document.getElementById(id).value || "").trim();
+const setVal = (id, v) => { document.getElementById(id).value = v == null ? "" : v; };
+
+function readHa(){
+  return {
+    name: val("ha_name"), dev: val("ha_dev"),
+    pfx: val("ha_pfx"), pri: val("ha_pri"), sec: val("ha_sec"), vip: val("ha_vip")
+  };
+}
+
+/* --------------------------------------------------- validazione di un blocco */
+function checkBlock(b, label){
+  const out = [];
+  const need = [["name","lblName"],["dev","lblDev"],["pri","lblPri"],["sec","lblSec"],["vip","lblVip"]];
+  let missing = false;
+  for (const [k, lb] of need){
+    if (!b[k]) { out.push(`${t(lb)}: ${t("eMissing")}`); missing = true; }
+  }
+  const pfx = Number(b.pfx);
+  if (!b.pfx || !Number.isInteger(pfx) || pfx < 8 || pfx > 30){ out.push(t("ePfx")); missing = true; }
+  if (missing) return { problems: out, ok: false };
+
+  const nums = {};
+  for (const [k, lb] of [["pri","lblPri"],["sec","lblSec"],["vip","lblVip"]]){
+    const n = ipToLong(b[k]);
+    if (n === null) out.push(`${t(lb)} "${b[k]}" ${t("eIpBad")}`);
+    else nums[k] = n;
+  }
+  if (out.length) return { problems: out, ok: false };
+
+  // la rete si deduce dall'indirizzo del primario e dal prefisso
+  const size = blockSize(pfx);
+  const base = netOf(nums.pri, pfx);
+  const bcast = base + size - 1;
+  const net = `${longToIp(base)}/${pfx}`;
+
+  for (const [k, lb] of [["sec","lblSec"],["vip","lblVip"]]){
+    if (nums[k] < base || nums[k] > bcast) out.push(`${t(lb)} ${b[k]} ${t("eNotSame")} (${net})`);
+  }
+  if (size > 2){
+    for (const [k, lb] of [["pri","lblPri"],["sec","lblSec"],["vip","lblVip"]]){
+      if (nums[k] === base || nums[k] === bcast) out.push(`${t(lb)} ${b[k]}: ${t("eEdge")}`);
+    }
+  }
+  if (nums.pri === nums.sec || nums.pri === nums.vip || nums.sec === nums.vip) out.push(t("eSame"));
+
+  return { problems: out, ok: out.length === 0, base, size, pfx, net, label };
+}
+
+/* --------------------------------------------------- validazione globale */
+function validateAll(){
+  const ha = readHa();
+  const blocks = [{ b: ha, label: ha.name || "HA", where: "ha" }]
+    .concat(lans.map(l => ({ b: l, label: l.name || t("lanN"), where: l.id })));
+
+  const results = {};
+  for (const x of blocks) results[x.where] = checkBlock(x.b, x.label);
+
+  // collisioni fra blocchi
+  const seenName = new Map(), seenDev = new Map();
+  for (const x of blocks){
+    const r = results[x.where];
+    const nm = (x.b.name || "").toLowerCase(), dv = (x.b.dev || "").toLowerCase();
+    if (nm){ if (seenName.has(nm)) r.problems.push(`"${x.b.name}": ${t("eName")}`); else seenName.set(nm, x.where); }
+    if (dv){ if (seenDev.has(dv)) r.problems.push(`"${x.b.dev}": ${t("eDev")}`); else seenDev.set(dv, x.where); }
+  }
+  // sovrapposizione di subnet
+  const ranges = blocks
+    .filter(x => results[x.where].base !== undefined)
+    .map(x => ({ where: x.where, label: x.label, a: results[x.where].base,
+                 z: results[x.where].base + results[x.where].size - 1 }));
+  for (let i = 0; i < ranges.length; i++){
+    for (let j = i + 1; j < ranges.length; j++){
+      if (ranges[i].a <= ranges[j].z && ranges[j].a <= ranges[i].z){
+        results[ranges[j].where].problems.push(`${t("eOverlap")} "${ranges[i].label}"`);
+      }
+    }
+  }
+  for (const k in results) results[k].ok = results[k].problems.length === 0;
+
+  // VIP aggiuntivi
+  const declared = new Set(blocks.map(x => (x.b.name || "").toLowerCase()).filter(Boolean));
+  const usable = new Set(blocks.filter(x => results[x.where].ok)
+                               .map(x => (x.b.name || "").toLowerCase()).filter(Boolean));
+  const vipRes = {};
+  for (const v of vips){
+    const p = [];
+    const nm = (v.iface || "").toLowerCase();
+    if (!v.iface) p.push(t("eVipIface"));
+    else if (!declared.has(nm)) p.push(`"${v.iface}": ${t("eVipKnown")}`);
+    else if (!usable.has(nm)) p.push(`"${v.iface}": ${t("eVipBroken")}`);
+
+    // l'indirizzo deve essere scrivibile, altrimenti il comando sarebbe rotto
+    let addrOk = true;
+    if (!v.vip){ p.push(`${t("lblVip")}: ${t("eMissing")}`); addrOk = false; }
+    else if (ipToLong(v.vip) === null){ p.push(`${t("lblVip")} "${v.vip}" ${t("eIpBad")}`); addrOk = false; }
+    const pf = Number(v.pfx);
+    if (!v.pfx || !Number.isInteger(pf) || pf < 8 || pf > 30){ p.push(t("ePfx")); addrOk = false; }
+
+    vipRes[v.id] = { problems: p, ok: p.length === 0, emit: addrOk && !!v.iface };
+  }
+  return { ha, blocks, results, vipRes };
+}
+
+/* ---------------------------------------------------------------- interfaccia */
+function lanRow(l){
+  const d = document.createElement("div");
+  d.className = "iface";
+  d.innerHTML = `
+    <div class="rowtop">
+      <span class="n"></span>
+      <button type="button" class="link noprint" data-del="${l.id}"></button>
+    </div>
+    <div class="ifgrid">
+      <label><span class="cap c-iface"></span><input type="text" class="mono" data-f="name" placeholder="dmz" spellcheck="false"></label>
+      <label><span class="cap c-dev"></span><input type="text" class="mono" data-f="dev" placeholder="eth2" spellcheck="false"></label>
+      <label><span class="cap c-pri"></span><input type="text" class="mono" data-f="pri" placeholder="192.168.200.1" spellcheck="false" inputmode="decimal"></label>
+      <label><span class="cap c-sec"></span><input type="text" class="mono" data-f="sec" placeholder="192.168.200.2" spellcheck="false" inputmode="decimal"></label>
+      <label class="wide"><span class="cap c-vip"></span><input type="text" class="mono" data-f="vip" placeholder="192.168.200.254" spellcheck="false" inputmode="decimal"></label>
+      <label><span class="cap c-pfx"></span><input type="number" class="mono" data-f="pfx" min="8" max="30" placeholder="24"></label>
+    </div>
+    <ul class="problems" data-problems="${l.id}"></ul>`;
+  d.querySelectorAll("input[data-f]").forEach(inp => {
+    inp.value = l[inp.dataset.f] || "";
+    inp.addEventListener("input", () => { l[inp.dataset.f] = inp.value.trim(); refresh(); });
+  });
+  d.querySelector("[data-del]").addEventListener("click", () => {
+    lans = lans.filter(x => x.id !== l.id); renderLans(); refresh();
+  });
+  return d;
+}
+
+function vipRow(v){
+  const d = document.createElement("div");
+  d.className = "iface";
+  d.innerHTML = `
+    <div class="rowtop">
+      <span class="n"></span>
+      <button type="button" class="link noprint" data-del="${v.id}"></button>
+    </div>
+    <div class="ifgrid">
+      <label class="wide"><span class="cap c-oniface"></span><input type="text" class="mono" data-f="iface" placeholder="lan2" spellcheck="false"></label>
+      <label><span class="cap c-viponly"></span><input type="text" class="mono" data-f="vip" placeholder="192.168.122.66" spellcheck="false" inputmode="decimal"></label>
+      <label><span class="cap c-pfx"></span><input type="number" class="mono" data-f="pfx" min="8" max="30" placeholder="24"></label>
+    </div>
+    <ul class="problems" data-problems="${v.id}"></ul>`;
+  d.querySelectorAll("input[data-f]").forEach(inp => {
+    inp.value = v[inp.dataset.f] || "";
+    inp.addEventListener("input", () => { v[inp.dataset.f] = inp.value.trim(); refresh(); });
+  });
+  d.querySelector("[data-del]").addEventListener("click", () => {
+    vips = vips.filter(x => x.id !== v.id); renderVips(); refresh();
+  });
+  return d;
+}
+
+function renderLans(){
+  const host = document.getElementById("lan_list");
+  host.innerHTML = "";
+  lans.forEach(l => host.appendChild(lanRow(l)));
+  labelRows();
+}
+function renderVips(){
+  const host = document.getElementById("vip_list");
+  host.innerHTML = "";
+  vips.forEach(v => host.appendChild(vipRow(v)));
+  labelRows();
+}
+function labelRows(){
+  document.querySelectorAll("#lan_list .iface").forEach((d, i) => {
+    d.querySelector(".n").textContent = `${t("lanN")} ${i + 1}`;
+    d.querySelector("[data-del]").textContent = t("remove");
+    const c = (s, k) => { const e = d.querySelector(s); if (e) e.textContent = t(k); };
+    c(".c-iface","fIface"); c(".c-dev","fDevice"); c(".c-pfx","fPrefix");
+    c(".c-pri","fPri"); c(".c-sec","fSec"); c(".c-vip","fVip");
+  });
+  document.querySelectorAll("#vip_list .iface").forEach((d, i) => {
+    d.querySelector(".n").textContent = `${t("vipN")} ${i + 1}`;
+    d.querySelector("[data-del]").textContent = t("remove");
+    const c = (s, k) => { const e = d.querySelector(s); if (e) e.textContent = t(k); };
+    c(".c-oniface","fOnIface"); c(".c-viponly","fVipOnly"); c(".c-pfx","fPrefix");
+  });
+}
+
+/* ---------------------------------------------------------------- comandi */
+const esc = (s) => String(s).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;");
+const escAttr = (s) => esc(s).replace(/"/g,"&quot;").replace(/'/g,"&#39;");
+const PH = "PASSWORD_ROOT_SECONDARIO";
+let plainCommands = "";
+
+function buildCommands(v){
+  const ha = v.ha;
+  const lines = [];            // testo puro, per il copia
+  let html = "";
+
+  let no = 0;
+  const step = (k) => {
+    no++;
+    const label = `${no} \u00b7 ${t(k)}`;
+    html += `<div class="step">${esc(label)}</div>`;
+    lines.push("# " + label);
+  };
+  const note = (k) => { html += `<div class="note"># ${esc(t(k))}</div>`; lines.push("# " + t(k)); };
+  const cmd  = (s) => {
+    const shown = esc(s).replace(PH, `<span class="ph">${PH}</span>`);
+    html += `<div class="cmdbox" data-cmd="${escAttr(s)}">` +
+            `<button type="button" class="cp noprint">${esc(t("copyOne"))}</button>` +
+            `${shown}</div>`;
+    lines.push(s);
+  };
+  const gap  = () => { lines.push(""); };
+
+  const flagged = vips.filter(x => v.vipRes[x.id] && !v.vipRes[x.id].ok && v.vipRes[x.id].emit)
+                      .map(x => x.iface + " " + x.vip);
+  if (flagged.length){
+    const warn = `${t("nVipWarn")} ${flagged.join(", ")}`;
+    html += `<div class="skip"># ${esc(warn)}</div>`;
+    lines.push("# " + warn, "");
+  }
+
+  const ni = document.getElementById("nonint").checked;
+  const withPwd = (rest) => ni ? `echo "${PH}" | ${rest}` : rest;
+
+  step("s1"); note("nPre");
+  cmd(`ns-ha-config check-primary-node ${ha.name}`);
+  note(ni ? "nPwd" : "nPwdAsk");
+  cmd(withPwd(`ns-ha-config check-backup-node ${ha.sec} ${ha.name}`));
+  gap();
+
+  step("s2");
+  cmd(`ns-ha-config init-primary-node ${ha.pri} ${ha.sec} ${ha.vip}/${ha.pfx} ${ha.name}`);
+  cmd(withPwd(`ns-ha-config init-backup-node ${ha.name}`));
+  gap();
+
+  const okLans = lans.filter(l => v.results[l.id] && v.results[l.id].ok && l.name);
+  if (okLans.length){
+    step("s3");
+    okLans.forEach(l => cmd(`ns-ha-config add-lan-interface ${l.pri} ${l.sec} ${l.vip}/${l.pfx}`));
+    gap();
+  }
+  const okVips = vips.filter(x => v.vipRes[x.id] && v.vipRes[x.id].emit);
+  if (okVips.length){
+    step("s4");
+    okVips.forEach(x => cmd(`ns-ha-config add-vip ${x.iface} ${x.vip}/${x.pfx}`));
+    gap();
+  }
+
+  step("sSync");
+  cmd("/usr/libexec/ns-rsync.sh");
+  gap();
+
+  step("sCheck"); note("nWait");
+  cmd("ns-ha-config status");
+
+  plainCommands = lines.join("\n");
+  return html;
+}
+
+const isHaTouched = (ha) => !!(ha.dev || ha.pri || ha.sec || ha.vip);
+// un errore nel blocco HA o in una LAN aggiuntiva ferma tutto (comandi e PDF)
+function blockingProblems(v){
+  const ha = v.ha;
+  const out = v.results.ha.problems.map(p => `${ha.name || "HA"}: ${p}`);
+  for (const l of lans){
+    const touched = l.name || l.dev || l.pri || l.sec || l.vip;
+    const r = v.results[l.id];
+    if (touched && r && !r.ok){
+      for (const p of r.problems) out.push(`${l.name || t("lanN")}: ${p}`);
+    }
+  }
+  return out;
+}
+
+function refresh(){
+  try{ localStorage.setItem("ns-tools-ha", JSON.stringify(collect())); }catch(_){}
+  const v = validateAll();
+
+  // problemi per blocco
+  const paint = (ulId, res) => {
+    const ul = document.getElementById(ulId) || document.querySelector(`[data-problems="${ulId}"]`);
+    if (!ul) return;
+    ul.innerHTML = "";
+    (res ? res.problems : []).forEach(p => {
+      const li = document.createElement("li"); li.textContent = p; ul.appendChild(li);
+    });
+  };
+  paint("ha_problems", v.results.ha);
+  lans.forEach(l => paint(l.id, v.results[l.id]));
+  vips.forEach(x => paint(x.id, v.vipRes[x.id]));
+
+  // blocco HA: segnala i campi vuoti o errati senza urlare
+  const ha = v.ha;
+  const flag = (id, bad) => document.getElementById(id).classList.toggle("err", !!bad);
+  const anyHa = ha.name || ha.dev || ha.pri || ha.sec || ha.vip;
+  flag("ha_pri", anyHa && ha.pri && ipToLong(ha.pri) === null);
+  flag("ha_sec", anyHa && ha.sec && ipToLong(ha.sec) === null);
+  flag("ha_vip", anyHa && ha.vip && ipToLong(ha.vip) === null);
+
+  const term = document.getElementById("terminal");
+  const after = document.getElementById("after");
+  const haTouched = isHaTouched(ha);
+
+  if (!haTouched){
+    term.innerHTML = `<div class="note">${esc(t("tEmpty"))}</div>`;
+    plainCommands = ""; after.innerHTML = ""; return;
+  }
+  const blocking = blockingProblems(v);
+  if (blocking.length){
+    const items = blocking.map(p => `<div class="blocked">— ${esc(p)}</div>`).join("");
+    term.innerHTML = `<div class="blocked"><b>${esc(t("tBlocked"))}</b> ${esc(t("tBlockedWhy"))}</div>${items}`;
+    plainCommands = ""; after.innerHTML = ""; return;
+  }
+
+  term.innerHTML = buildCommands(v);
+  after.innerHTML =
+    `<p><strong>${esc(t("aAfter"))}</strong></p>` +
+    `<p>${esc(t("aWait"))}</p><p>${esc(t("aWan"))}</p><p>${esc(t("aClients"))}</p>`;
+}
+
+/* ---------------------------------------------------------------- lingua */
+function applyLang(){
+  ROOT.querySelectorAll("[data-i18n]").forEach(el => {
+    const k = el.dataset.i18n;
+    if (T[L][k] !== undefined) el.textContent = T[L][k];
+  });
+  labelRows();
+  refresh();
+}
+
+/* ---------------------------------------------------------------- salva / apri */
+function collect(){
+  return {
+    tool: "nethsecurity-ha-planner", target: NSTools.version, lang: L,
+    project: {
+      customer: val("m_customer"), site: val("m_site"), author: val("m_author"),
+      date: val("m_date"), version: val("m_version"), notes: val("m_notes")
+    },
+    ha: readHa(),
+    lans: lans.map(({id, ...r}) => r),
+    vips: vips.map(({id, ...r}) => r)
+  };
+}
+function restore(d){
+  const p = d.project || {};
+  setVal("m_customer", p.customer); setVal("m_site", p.site); setVal("m_author", p.author);
+  setVal("m_date", p.date); setVal("m_version", p.version); setVal("m_notes", p.notes);
+  const h = d.ha || {};
+  ["name","dev","pfx","pri","sec","vip"].forEach(k => setVal("ha_" + k, h[k]));
+  // "net" è presente nei piani salvati con versioni precedenti: si scarta
+  lans = (d.lans || []).map(({net, ...r}) => ({ id: uid(), ...r }));
+  vips = (d.vips || []).map(r => ({ id: uid(), ...r }));
+  renderLans(); renderVips(); refresh();
+}
+
+/* ---------------------------------------------------------------- avvio */
+document.querySelectorAll("#ha_block input").forEach(i => i.addEventListener("input", refresh));
+
+document.getElementById("add_lan").addEventListener("click", () => {
+  lans.push({ id: uid(), name:"", dev:"", pfx:"24", pri:"", sec:"", vip:"" });
+  renderLans(); refresh();
+});
+document.getElementById("add_vip").addEventListener("click", () => {
+  vips.push({ id: uid(), iface:"", vip:"", pfx:"24" });
+  renderVips(); refresh();
+});
+
+document.getElementById("copy").addEventListener("click", async (e) => {
+  if (!plainCommands) return;
+  await toClipboard(plainCommands);
+  const btn = e.currentTarget, old = btn.textContent;
+  btn.textContent = t("copied");
+  setTimeout(() => { btn.textContent = old; }, 1400);
+});
+
+async function toClipboard(text){
+  try{ await navigator.clipboard.writeText(text); return true; }
+  catch(_){
+    const ta = document.createElement("textarea");
+    ta.value = text; document.body.appendChild(ta); ta.select();
+    let ok = false;
+    try{ ok = document.execCommand("copy"); }catch(__){}
+    document.body.removeChild(ta);
+    return ok;
+  }
+}
+
+document.getElementById("terminal").addEventListener("click", async (e) => {
+  const btn = e.target.closest(".cp");
+  if (!btn) return;
+  const boxEl = btn.parentElement;
+  await toClipboard(boxEl.getAttribute("data-cmd") || "");
+  const old = btn.textContent;
+  btn.textContent = t("copied");
+  btn.classList.add("done");
+  setTimeout(() => { btn.textContent = old; btn.classList.remove("done"); }, 1200);
+});
+
+document.getElementById("nonint").addEventListener("change", refresh);
+
+
+document.getElementById("save").addEventListener("click", async (e) => {
+  const btn = e.currentTarget, old = btn.textContent;
+  const name = (val("m_customer") || "ha-plan").toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "") || "ha-plan";
+  const text = JSON.stringify(collect(), null, 2);
+  const r = await NSTools.saveFile(name + ".ha.json", text, "application/json");
+  if (r !== "saved") return;
+  btn.textContent = t("saved");
+  setTimeout(() => { btn.textContent = old; }, 2200);
+});
+
+/* ---------------------------------------------------------------- PDF del piano */
+const JSPDF_URL = "https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js";
+let jsPdfLoading = null;
+function loadJsPdf(){
+  if (window.jspdf && window.jspdf.jsPDF) return Promise.resolve(window.jspdf.jsPDF);
+  if (!jsPdfLoading){
+    jsPdfLoading = new Promise((res, rej) => {
+      const sc = document.createElement("script");
+      sc.src = JSPDF_URL;
+      sc.onload = () => (window.jspdf && window.jspdf.jsPDF) ? res(window.jspdf.jsPDF) : rej(new Error("jspdf"));
+      sc.onerror = () => rej(new Error("jspdf"));
+      document.head.appendChild(sc);
+    }).catch(err => { jsPdfLoading = null; throw err; });
+  }
+  return jsPdfLoading;
+}
+
+function buildPdf(JsPDF, v){
+  const doc = new JsPDF({ unit: "mm", format: "a4" });
+  const M = 14, W = 210 - 2 * M, BOTTOM = 280;
+  const TEAL = [14, 116, 144], INK = [15, 23, 42], BODY = [30, 41, 59], MUTED = [100, 116, 139],
+        HAIR = [226, 232, 240], HEAD = [243, 245, 247];
+  const color = (c) => doc.setTextColor(c[0], c[1], c[2]);
+  let y = M;
+
+  // intestazione
+  doc.setFont("helvetica", "bold"); doc.setFontSize(9); color(TEAL);
+  doc.text("NethSecurity", M, y + 3);
+  doc.setFont("helvetica", "normal"); color(MUTED);
+  doc.text(t("pdfVer", { v: NSTools.version }), M + W, y + 3, { align: "right" });
+  y += 11;
+  doc.setFont("helvetica", "bold"); doc.setFontSize(17); color(INK);
+  doc.text(t("pdfTitle"), M, y);
+  y += 4;
+  doc.setDrawColor(TEAL[0], TEAL[1], TEAL[2]); doc.setLineWidth(0.6); doc.line(M, y, M + W, y);
+  y += 9;
+
+  const section = (title) => {
+    if (y > BOTTOM - 20){ doc.addPage(); y = M + 4; }
+    doc.setFont("helvetica", "bold"); doc.setFontSize(11); color(INK);
+    doc.text(title, M, y); y += 5;
+  };
+
+  // progetto: due colonne di coppie etichetta / valore
+  section(t("pdfProj"));
+  const proj = [["fCustomer","m_customer"],["fSite","m_site"],["fAuthor","m_author"],
+                ["fDate","m_date"],["fVersion","m_version"],["fNotes","m_notes"]];
+  const colW = W / 2;
+  proj.forEach(([k, id], i) => {
+    const cx = M + (i % 2) * colW, cy = y + Math.floor(i / 2) * 11;
+    doc.setFont("helvetica", "normal"); doc.setFontSize(8); color(MUTED);
+    doc.text(t(k), cx, cy + 3);
+    doc.setFontSize(10.5); color(BODY);
+    const txt = doc.splitTextToSize(val(id) || "-", colW - 6)[0];
+    doc.text(txt, cx, cy + 8);
+  });
+  y += Math.ceil(proj.length / 2) * 11 + 6;
+
+  // tabella generica
+  const table = (cols, rows, accentRow) => {
+    const rh = 7.5;
+    const header = () => {
+      doc.setFillColor(HEAD[0], HEAD[1], HEAD[2]); doc.rect(M, y, W, rh, "F");
+      doc.setFont("helvetica", "bold"); doc.setFontSize(8.5); color(BODY);
+      let x = M;
+      cols.forEach(c => { doc.text(c.h, x + 2, y + 5); x += c.w; });
+      y += rh;
+    };
+    header();
+    rows.forEach((r, ri) => {
+      if (y + rh > BOTTOM){ doc.addPage(); y = M + 4; header(); }
+      if (ri === accentRow){
+        doc.setFillColor(TEAL[0], TEAL[1], TEAL[2]); doc.rect(M, y, 1.2, rh, "F");
+      }
+      let x = M;
+      cols.forEach((c, ci) => {
+        doc.setFont(c.mono ? "courier" : "helvetica", ri === accentRow && ci === 0 ? "bold" : "normal");
+        doc.setFontSize(c.mono ? 8.5 : 9.5); color(BODY);
+        doc.text(doc.splitTextToSize(String(r[ci] || "-"), c.w - 3)[0], x + 2, y + 5);
+        x += c.w;
+      });
+      y += rh;
+      doc.setDrawColor(HAIR[0], HAIR[1], HAIR[2]); doc.setLineWidth(0.2); doc.line(M, y, M + W, y);
+    });
+    y += 8;
+  };
+
+  // interfacce del cluster
+  section(t("pdfCluster"));
+  const ha = v.ha;
+  const okLans = lans.filter(l => v.results[l.id] && v.results[l.id].ok && l.name);
+  const rows = [[t("roleHa"), ha.name, ha.dev, v.results.ha.net, ha.pri, ha.sec, ha.vip]]
+    .concat(okLans.map(l => [t("roleLan"), l.name, l.dev, v.results[l.id].net, l.pri, l.sec, l.vip]));
+  table([
+    { h: t("pdfRole"), w: 20 }, { h: t("pdfIface"), w: 20, mono: true }, { h: t("fDevice"), w: 16, mono: true },
+    { h: t("pdfNet"), w: 36, mono: true }, { h: t("lblPri"), w: 30, mono: true },
+    { h: t("lblSec"), w: 30, mono: true }, { h: t("lblVip"), w: 30, mono: true }
+  ], rows, 0);
+
+  // VIP aggiuntivi
+  section(t("pdfVips"));
+  const okVips = vips.filter(x => v.vipRes[x.id] && v.vipRes[x.id].emit);
+  if (okVips.length){
+    table([{ h: t("fOnIface"), w: 60, mono: true }, { h: t("fVipOnly"), w: 60, mono: true }],
+          okVips.map(x => [x.iface, `${x.vip}/${x.pfx}`]), -1);
+  } else {
+    doc.setFont("helvetica", "normal"); doc.setFontSize(9.5); color(MUTED);
+    doc.text(t("pdfNone"), M, y + 2);
+  }
+
+  // piè di pagina
+  const today = new Date().toLocaleDateString(L === "it" ? "it-IT" : "en-GB");
+  const n = doc.getNumberOfPages();
+  for (let i = 1; i <= n; i++){
+    doc.setPage(i);
+    doc.setFont("helvetica", "normal"); doc.setFontSize(8); color(MUTED);
+    doc.text(t("pdfGen", { d: today }), M, 290);
+    doc.text(t("pdfPage", { n: i, t: n }), M + W, 290, { align: "right" });
+  }
+  return doc;
+}
+
+document.getElementById("pdf").addEventListener("click", async (e) => {
+  const btn = e.currentTarget;
+  if (btn.disabled) return;
+  const label = t("pdf");
+  const flashMsg = (k) => { btn.textContent = t(k); setTimeout(() => { btn.textContent = t("pdf"); }, 2600); };
+  const v = validateAll();
+  if (!isHaTouched(v.ha) || blockingProblems(v).length){ flashMsg("pdfBlocked"); return; }
+  btn.disabled = true; btn.textContent = t("pdfWait");
+  let JsPDF;
+  try{ JsPDF = await loadJsPdf(); }
+  catch(_){ btn.disabled = false; flashMsg("pdfFail"); return; }
+  try{
+    const doc = buildPdf(JsPDF, v);
+    const name = (val("m_customer") || "").toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "");
+    const file = (name ? name + "-" : "") + t("pdfFile") + ".pdf";
+    const r = await NSTools.saveFile(file, doc.output("blob"), "application/pdf");
+    btn.disabled = false;
+    if (r === "saved") flashMsg("pdfDone"); else btn.textContent = label;
+  }catch(_){ btn.disabled = false; flashMsg("pdfFail"); }
+});
+document.getElementById("loadbtn").addEventListener("click", () => document.getElementById("loadfile").click());
+document.getElementById("loadfile").addEventListener("change", (e) => {
+  const f = e.target.files[0];
+  if (!f) return;
+  const r = new FileReader();
+  r.onload = () => { try{ restore(JSON.parse(r.result)); }catch(_){ } };
+  r.readAsText(f);
+  e.target.value = "";
+});
+
+document.getElementById("example").addEventListener("click", () => {
+  restore({
+    project:{ customer:"Nethesis Inc.", site:"Sede", author:"", date:"", version:NSTools.version, notes:"" },
+    ha:{ name:"lan", dev:"eth0", pfx:"24",
+         pri:"192.168.100.238", sec:"192.168.100.239", vip:"192.168.100.240" },
+    lans:[],
+    vips:[]
+  });
+});
+
+(function init(){
+  let d = null;
+  try{ d = JSON.parse(localStorage.getItem("ns-tools-ha") || "null"); }catch(_){}
+  if (d && d.ha && (d.ha.pri || d.ha.sec || d.ha.vip)) restore(d);
+  else document.getElementById("example").click();
+})();
+NSTools.register({ id: "ha", setLang(l){ L = l; applyLang(); } });
+
+})();
+</script>
+<script>
+(function(){
+const ROOT = document.getElementById("tool-netmap");
+
+const T = {
+  it:{
+    netH:"Le due sedi",
+    netLead:"Rete reale: quella che c'è davvero in LAN. Rete di appoggio: come quella LAN viene vista dall'altra sede. Deve avere la stessa dimensione e non esistere in nessuna delle due sedi.",
+    siteA:"Sede A", siteB:"Sede B", fName:"Nome del firewall", fReal:"Rete reale (LAN)", fMap:"Rete di appoggio",
+    suggest:"Proponi le reti di appoggio", example:"Ricarica l'esempio", clear:"Svuota",
+    howH:"Come funziona",
+    how1:"Ogni firewall traduce la propria LAN. In uscita verso l'altra sede una source NETMAP cambia la sorgente: la rete reale diventa la rete di appoggio.",
+    how2:"In ingresso dall'altra sede una destination NETMAP fa il contrario: la destinazione, che è la rete di appoggio, torna la rete reale.",
+    how3:"Gli host non cambiano l'ultima parte dell'indirizzo: per raggiungere l'altra sede si usa la sua rete di appoggio.",
+    outH:"Configurazione", copied:"Copiato", copy:"copia",
+    empty:"Inserisci la rete reale e la rete di appoggio delle due sedi: qui compaiono lo schema e la configurazione.",
+    blocked:"Configurazione non generata. Correggi prima:",
+    schemaH:"Schema: un pacchetto da A verso B",
+    pk1:"in LAN A", pk2:"nel tunnel", pk3:"in LAN B",
+    src:"sorgente", dst:"destinazione",
+    seenAs:"vista da {o} come", tunnel:"tunnel VPN",
+    st1:"1 · Tunnel VPN", st1where:"Nel tunnel verso {o} (OpenVPN, IPsec o WireGuard): le reti del tunnel sono quelle di appoggio, mai quelle reali.",
+    tLocal:"Rete locale del tunnel", tRemote:"Rete remota del tunnel",
+    st2:"2 · Source NETMAP", st2where:"Firewall › NAT › NETMAP › Aggiungi source NETMAP. Cambia la sorgente del traffico che esce verso {o}.",
+    st3:"3 · Destination NETMAP", st3where:"Firewall › NAT › NETMAP › Aggiungi destination NETMAP. Cambia la destinazione del traffico che arriva da {o}.",
+    kName:"Nome", kDst:"Rete di destinazione", kSrc:"Rete sorgente", kMap:"Rete mappata",
+    adv:"Impostazioni avanzate: lascia vuoti i device di ingresso e uscita, così la regola vale per tutti.",
+    checkH:"Verifica, con due host di esempio",
+    checkAB:"Da {ha} (sede A), per raggiungere {hb} (sede B):",
+    checkBA:"Da {hb} (sede B), per raggiungere {ha} (sede A):",
+    checkSee:"Sull'altro lato la connessione arriva da {x}: è l'indirizzo da usare in regole firewall e log.",
+    notesH:"Da sapere",
+    n1:"Le regole di firewall tra le due sedi si scrivono con le reti di appoggio dell'altra sede.",
+    n2:"Le reti di appoggio non devono esistere in nessuna delle due sedi né in altre VPN.",
+    n3:"Se un nome DNS dell'altra sede risolve all'IP reale, non funziona: va usato l'indirizzo della rete di appoggio.",
+    eReq:"campo obbligatorio", eCidr:"non è una rete valida: scrivila come 192.168.1.0/24",
+    eHostBits:"usa l'indirizzo di rete: {n}", ePfx:"il prefisso deve essere fra 8 e 30",
+    eSize:"la rete di appoggio deve avere lo stesso prefisso della rete reale (/{p})",
+   
+    eOverlap:"{x} si sovrappone a {y}",
+    lRealA:"rete reale di A", lRealB:"rete reale di B", lMapA:"rete di appoggio di A", lMapB:"rete di appoggio di B",
+    wNoOverlap:"Le reti reali delle due sedi non si sovrappongono: il NETMAP non serve, basta un tunnel con le reti reali. La configurazione qui sotto resta valida, ma è inutile.",
+    fieldReal:"rete reale", fieldMap:"rete di appoggio"
+  },
+  en:{
+    netH:"The two sites",
+    netLead:"Real network: the one actually on the LAN. Mapped network: how that LAN is seen from the other site. Same size, and it must not exist at either site.",
+    siteA:"Site A", siteB:"Site B", fName:"Firewall name", fReal:"Real network (LAN)", fMap:"Mapped network",
+    suggest:"Suggest mapped networks", example:"Reload the example", clear:"Clear",
+    howH:"How it works",
+    how1:"Each firewall translates its own LAN. Going out to the other site, a source NETMAP changes the source: the real network becomes the mapped network.",
+    how2:"Coming in from the other site, a destination NETMAP does the opposite: the destination, which is the mapped network, goes back to the real network.",
+    how3:"Hosts keep the last part of their address: to reach the other site you use its mapped network.",
+    outH:"Configuration", copied:"Copied", copy:"copy",
+    empty:"Enter the real and mapped networks of both sites: the diagram and the configuration appear here.",
+    blocked:"No configuration generated. Fix these first:",
+    schemaH:"Diagram: one packet from A to B",
+    pk1:"on LAN A", pk2:"in the tunnel", pk3:"on LAN B",
+    src:"source", dst:"destination",
+    seenAs:"seen from {o} as", tunnel:"VPN tunnel",
+    st1:"1 · VPN tunnel", st1where:"In the tunnel to {o} (OpenVPN, IPsec or WireGuard): the tunnel networks are the mapped ones, never the real ones.",
+    tLocal:"Tunnel local network", tRemote:"Tunnel remote network",
+    st2:"2 · Source NETMAP", st2where:"Firewall › NAT › NETMAP › Add source NETMAP. Changes the source of traffic going out to {o}.",
+    st3:"3 · Destination NETMAP", st3where:"Firewall › NAT › NETMAP › Add destination NETMAP. Changes the destination of traffic coming from {o}.",
+    kName:"Name", kDst:"Destination network", kSrc:"Source network", kMap:"Mapped network",
+    adv:"Advanced settings: leave the input and output devices empty, so the rule applies to all of them.",
+    checkH:"Test, with two example hosts",
+    checkAB:"From {ha} (site A), to reach {hb} (site B):",
+    checkBA:"From {hb} (site B), to reach {ha} (site A):",
+    checkSee:"On the other side the connection comes from {x}: use that address in firewall rules and logs.",
+    notesH:"Good to know",
+    n1:"Firewall rules between the two sites use the other site's mapped network.",
+    n2:"The mapped networks must not exist at either site or in any other VPN.",
+    n3:"If a DNS name of the other site resolves to its real IP it will not work: use the mapped address.",
+    eReq:"required", eCidr:"not a valid network: write it as 192.168.1.0/24",
+    eHostBits:"use the network address: {n}", ePfx:"the prefix must be between 8 and 30",
+    eSize:"the mapped network must have the same prefix as the real one (/{p})",
+   
+    eOverlap:"{x} overlaps {y}",
+    lRealA:"A real network", lRealB:"B real network", lMapA:"A mapped network", lMapB:"B mapped network",
+    wNoOverlap:"The real networks of the two sites do not overlap: NETMAP is not needed, a tunnel with the real networks is enough. The configuration below is still valid, just unnecessary.",
+    fieldReal:"real network", fieldMap:"mapped network"
+  }
+};
+let L = "it";
+const t = (k, v) => { let s = T[L][k]; if (v) for (const x in v) s = s.split("{" + x + "}").join(v[x]); return s; };
+
+/* ---------- IPv4 ---------- */
+function ipToLong(s){
+  if (typeof s !== "string") return null;
+  const p = s.trim().split(".");
+  if (p.length !== 4) return null;
+  let n = 0;
+  for (const o of p){ if (!/^\d{1,3}$/.test(o)) return null; const v = +o; if (v > 255) return null; n = n * 256 + v; }
+  return n;
+}
+const longToIp = (n) => [Math.floor(n / 16777216) % 256, Math.floor(n / 65536) % 256, Math.floor(n / 256) % 256, n % 256].join(".");
+const size = (p) => Math.pow(2, 32 - p);
+const netOf = (n, p) => Math.floor(n / size(p)) * size(p);
+function parseCidr(s){
+  const m = /^\s*([\d.]+)\s*\/\s*(\d{1,2})\s*$/.exec(s || "");
+  if (!m) return { err: "cidr" };
+  const ip = ipToLong(m[1]); const p = +m[2];
+  if (ip === null) return { err: "cidr" };
+  if (p < 8 || p > 30) return { err: "pfx" };
+  const base = netOf(ip, p);
+  if (base !== ip) return { err: "host", fix: longToIp(base) + "/" + p };
+  return { base, p, end: base + size(p) - 1, str: longToIp(base) + "/" + p };
+}
+const overlaps = (a, b) => a.base <= b.end && b.base <= a.end;
+
+/* ---------- stato ---------- */
+const ids = ["a_name","a_real","a_map","b_name","b_real","b_map"];
+const val = (id) => (document.getElementById(id).value || "").trim();
+const setVal = (id, v) => { document.getElementById(id).value = v == null ? "" : v; };
+const EXAMPLE = { a_name:"fwA", a_real:"192.168.1.0/24", a_map:"10.1.1.0/24",
+                  b_name:"fwB", b_real:"192.168.1.0/24", b_map:"10.2.2.0/24" };
+
+function save(){ try{ localStorage.setItem("netmap-plan", JSON.stringify(Object.fromEntries(ids.map(i => [i, val(i)])))); }catch(_){} }
+function load(){ try{ const d = JSON.parse(localStorage.getItem("netmap-plan") || "null"); return d && typeof d === "object" ? d : null; }catch(_){ return null; } }
+
+/* ---------- validazione ---------- */
+function checkSite(px){
+  const out = [], r = {};
+  const real = val(px + "_real"), map = val(px + "_map");
+  const one = (v, label) => {
+    if (!v){ out.push(label + ": " + t("eReq")); return null; }
+    const c = parseCidr(v);
+    if (c.err === "cidr"){ out.push(label + " \"" + v + "\": " + t("eCidr")); return null; }
+    if (c.err === "pfx"){ out.push(label + ": " + t("ePfx")); return null; }
+    if (c.err === "host"){ out.push(label + ": " + t("eHostBits", { n: c.fix })); return null; }
+    return c;
+  };
+  r.real = one(real, t("fieldReal"));
+  r.map = one(map, t("fieldMap"));
+  if (r.real && r.map && r.real.p !== r.map.p){ out.push(t("eSize", { p: r.real.p })); r.map = null; }
+  r.problems = out;
+  return r;
+}
+
+function validate(){
+  const a = checkSite("a"), b = checkSite("b");
+  const glob = [];
+  let warn = "";
+  if (a.real && b.real && a.map && b.map){
+    const list = [[a.real, t("lRealA")], [b.real, t("lRealB")], [a.map, t("lMapA")], [b.map, t("lMapB")]];
+    const pairs = [[2,0],[2,1],[3,0],[3,1],[2,3]];
+    for (const [i, j] of pairs) if (overlaps(list[i][0], list[j][0])) glob.push(t("eOverlap", { x: list[i][1], y: list[j][1] }));
+    if (!overlaps(a.real, b.real)) warn = t("wNoOverlap");
+  }
+  return { a, b, glob, warn, ok: !a.problems.length && !b.problems.length && !glob.length && a.real && b.real && a.map && b.map };
+}
+
+/* ---------- reti di appoggio proposte ---------- */
+function suggest(){
+  const a = parseCidr(val("a_real")), b = parseCidr(val("b_real"));
+  if (a.err || b.err) { refresh(); return; }
+  const taken = [a, b];
+  const pick = (p, seed) => {
+    let n = netOf(ipToLong(seed), p);
+    const last = ipToLong("10.255.255.255");
+    while (n + size(p) - 1 <= last){
+      const c = { base: n, p, end: n + size(p) - 1, str: longToIp(n) + "/" + p };
+      if (!taken.some(x => overlaps(x, c))){ taken.push(c); return c.str; }
+      n += size(p);
+    }
+    return "";
+  };
+  setVal("a_map", pick(a.p, "10.1.1.0"));
+  setVal("b_map", pick(b.p, "10.2.2.0"));
+  refresh();
+}
+
+/* ---------- uscita ---------- */
+const esc = (s) => String(s).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;");
+const ruleName = (pre, nm) => (pre + "_" + (nm || "fw")).toUpperCase().replace(/[^A-Z0-9_]/g, "_").slice(0, 30);
+
+function fieldRow(k, v){ return `<tr><td class="k">${esc(k)}</td><td class="v">${esc(v)}<button type="button" class="cp" data-copy="${esc(v)}">${esc(t("copy"))}</button></td></tr>`; }
+
+function svgSchema(nA, nB, a, b, hA, hB){
+  const mA = a.map.base + (hA - a.real.base), mB = b.map.base + (hB - b.real.base);
+  const ip = longToIp;
+  const pk = (x, y, label, src, dst, chSrc, chDst) => `
+    <g transform="translate(${x},${y})">
+      <rect class="s-pk" x="0" y="0" width="196" height="64" rx="6"/>
+      <text class="s-tag" x="10" y="16">${esc(label)}</text>
+      <text class="s-s" x="10" y="35">${esc(t("src"))}</text>
+      <text class="${chSrc ? "s-ch" : "s-m"}" x="82" y="35">${esc(ip(src))}</text>
+      <text class="s-s" x="10" y="53">${esc(t("dst"))}</text>
+      <text class="${chDst ? "s-ch" : "s-m"}" x="82" y="53">${esc(ip(dst))}</text>
+    </g>`;
+  return `<svg viewBox="0 0 640 250" role="img" aria-label="${esc(t("schemaH"))}">
+    <rect class="s-box s-lan-a" x="6" y="10" width="150" height="86" rx="8"/>
+    <text class="s-t" x="18" y="32">LAN A</text>
+    <text class="s-m" x="18" y="52">${esc(a.real.str)}</text>
+    <text class="s-s" x="18" y="70">${esc(t("seenAs", { o: nB }))}</text>
+    <text class="s-m" x="18" y="86">${esc(a.map.str)}</text>
+    <rect class="s-box s-lan-b" x="484" y="10" width="150" height="86" rx="8"/>
+    <text class="s-t" x="496" y="32">LAN B</text>
+    <text class="s-m" x="496" y="52">${esc(b.real.str)}</text>
+    <text class="s-s" x="496" y="70">${esc(t("seenAs", { o: nA }))}</text>
+    <text class="s-m" x="496" y="86">${esc(b.map.str)}</text>
+    <line class="s-line" x1="156" y1="53" x2="186" y2="53"/>
+    <rect class="s-fw" x="186" y="32" width="88" height="42" rx="6"/>
+    <text class="s-t" x="230" y="58" text-anchor="middle">${esc(nA)}</text>
+    <path class="s-tun" d="M274 53 L366 53"/>
+    <text class="s-tag" x="320" y="44" text-anchor="middle">${esc(t("tunnel"))}</text>
+    <rect class="s-fw" x="366" y="32" width="88" height="42" rx="6"/>
+    <text class="s-t" x="410" y="58" text-anchor="middle">${esc(nB)}</text>
+    <line class="s-line" x1="454" y1="53" x2="484" y2="53"/>
+    <text class="s-s" x="230" y="92" text-anchor="middle">source NETMAP</text>
+    <text class="s-s" x="410" y="92" text-anchor="middle">destination NETMAP</text>
+    <line class="s-line" x1="230" y1="100" x2="230" y2="150" stroke-dasharray="2 3"/>
+    <line class="s-line" x1="410" y1="100" x2="410" y2="150" stroke-dasharray="2 3"/>
+    ${pk(14, 170, "1 · " + t("pk1"), hA, mB, false, false)}
+    ${pk(222, 170, "2 · " + t("pk2"), mA, mB, true, false)}
+    ${pk(430, 170, "3 · " + t("pk3"), mA, hB, false, true)}
+  </svg>`;
+}
+
+function fwCard(cls, me, other, mine, theirs){
+  const src = ruleName("SRC", me), dst = ruleName("DST", me);
+  let h = `<div class="fw ${cls}"><header><h3>${esc(me)}</h3></header><div class="body">`;
+  h += `<div><div class="stepname">${esc(t("st1"))}</div><div class="where">${esc(t("st1where", { o: other }))}</div><table class="fields">${fieldRow(t("tLocal"), mine.map.str)}${fieldRow(t("tRemote"), theirs.map.str)}</table></div>`;
+  const cell = (v) => `${esc(v)}<button type="button" class="cp" data-copy="${esc(v)}">${esc(t("copy"))}</button>`;
+  const uiTable = (tab, cols, vals) => `<div class="nsui"><span class="tab">${esc(tab)}</span><div class="tbl"><table><thead><tr>${cols.map(c => `<th>${esc(c)}</th>`).join("")}</tr></thead><tbody><tr>${vals.map(v => `<td>${cell(v)}</td>`).join("")}</tr></tbody></table></div></div>`;
+  h += `<div><div class="stepname">${esc(t("st2"))}</div><div class="where">${esc(t("st2where", { o: other }))}</div>${uiTable("Source NETMAP", [t("kName"), t("kDst"), t("kSrc"), t("kMap")], [src, theirs.map.str, mine.real.str, mine.map.str])}</div>`;
+  h += `<div><div class="stepname">${esc(t("st3"))}</div><div class="where">${esc(t("st3where", { o: other }))}</div>${uiTable("Destination NETMAP", [t("kName"), t("kSrc"), t("kDst"), t("kMap")], [dst, theirs.map.str, mine.map.str, mine.real.str])}<div class="where" style="margin-top:8px">${esc(t("adv"))}</div></div>`;
+  h += `</div></div>`;
+  return h;
+}
+
+function refresh(){
+  const v = validate();
+  const paint = (id, list) => { document.getElementById(id).innerHTML = list.map(p => `<li>${esc(p)}</li>`).join(""); };
+  paint("a_problems", v.a.problems); paint("b_problems", v.b.problems); paint("g_problems", v.glob);
+  document.getElementById("g_warn").innerHTML = v.warn ? `<div class="warn">${esc(v.warn)}</div>` : "";
+  for (const px of ["a","b"]) for (const f of ["real","map"]){
+    const el = document.getElementById(px + "_" + f), s = val(px + "_" + f);
+    el.classList.toggle("err", !!s && !v[px][f]);
+  }
+  save();
+
+  const sch = document.getElementById("schema"), cfg = document.getElementById("config");
+  const any = ["a_real","a_map","b_real","b_map"].some(i => val(i));
+  if (!any){ sch.innerHTML = `<p class="notes">${esc(t("empty"))}</p>`; cfg.innerHTML = ""; return; }
+  if (!v.ok){
+    const all = v.a.problems.map(p => "A · " + p).concat(v.b.problems.map(p => "B · " + p), v.glob);
+    sch.innerHTML = `<div class="blocked"><b>${esc(t("blocked"))}</b>${all.map(p => `<div>— ${esc(p)}</div>`).join("")}</div>`;
+    cfg.innerHTML = ""; return;
+  }
+  const nA = val("a_name") || "fwA", nB = val("b_name") || "fwB";
+  // host di esempio scelti dal tool: .10 in A e .20 in B (o l'ultimo host utile nelle reti piccole)
+  const hA = v.a.real.base + Math.min(10, size(v.a.real.p) - 2);
+  const hB = v.b.real.base + Math.min(20, size(v.b.real.p) - 2);
+  const mA = v.a.map.base + (hA - v.a.real.base), mB = v.b.map.base + (hB - v.b.real.base);
+  const ip = longToIp;
+  sch.innerHTML = `<div class="schema">${svgSchema(nA, nB, v.a, v.b, hA, hB)}</div>`;
+  let h = `<div class="configs">${fwCard("a", nA, nB, v.a, v.b)}${fwCard("b", nB, nA, v.b, v.a)}</div>`;
+  h += `<div class="check"><h3>${esc(t("checkH"))}</h3>
+    <p>${esc(t("checkAB", { ha: ip(hA), hb: ip(hB) }))}&nbsp;<code>ping ${esc(ip(mB))}</code></p>
+    <p>${esc(t("checkBA", { ha: ip(hA), hb: ip(hB) }))}&nbsp;<code>ping ${esc(ip(mA))}</code></p>
+    <p class="notes">${esc(t("checkSee", { x: ip(mA) }))}</p></div>`;
+  h += `<div class="notes" style="margin-top:20px"><div class="stepname">${esc(t("notesH"))}</div><p>${esc(t("n1"))}</p><p>${esc(t("n2"))}</p><p>${esc(t("n3"))}</p></div>`;
+  cfg.innerHTML = h;
+}
+
+/* ---------- lingua ---------- */
+function applyLang(){
+  ROOT.querySelectorAll("[data-i18n]").forEach(el => { const k = el.dataset.i18n; if (T[L][k] !== undefined) el.textContent = T[L][k]; });
+  refresh();
+}
+
+/* ---------- copia ---------- */
+async function toClipboard(text){
+  try{ await navigator.clipboard.writeText(text); return true; }
+  catch(_){
+    const ta = document.createElement("textarea"); ta.value = text; document.body.appendChild(ta); ta.select();
+    let ok = false; try{ ok = document.execCommand("copy"); }catch(__){}
+    document.body.removeChild(ta); return ok;
+  }
+}
+function flash(btn, cls){ const old = btn.textContent; btn.textContent = t("copied"); if (cls) btn.classList.add(cls); setTimeout(() => { btn.textContent = old; if (cls) btn.classList.remove(cls); }, 1300); }
+
+/* ---------- avvio ---------- */
+ids.forEach(i => document.getElementById(i).addEventListener("input", refresh));
+document.getElementById("nm_suggest").addEventListener("click", suggest);
+document.getElementById("nm_example").addEventListener("click", () => { ids.forEach(i => setVal(i, EXAMPLE[i] || "")); refresh(); });
+document.getElementById("nm_clear").addEventListener("click", () => { ids.forEach(i => setVal(i, "")); refresh(); });
+document.getElementById("config").addEventListener("click", async (e) => {
+  const b = e.target.closest(".cp"); if (!b) return;
+  await toClipboard(b.getAttribute("data-copy") || ""); flash(b, "done");
+});
+
+(function init(){
+  const d = load();
+  const hasData = d && ["a_real","a_map","b_real","b_map"].some(k => d[k]);
+  const src = hasData ? d : EXAMPLE;
+  ids.forEach(i => setVal(i, src[i] || ""));
+  applyLang();
+})();
+NSTools.register({ id: "netmap", setLang(l){ L = l; applyLang(); } });
+
+})();
+</script>
+<script>NSTools.start();</script>
+</body>
+</html>
